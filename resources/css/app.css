@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@keyframes simanis-mark-draw {
+    from { opacity: 0; transform: scale(.82) rotate(-8deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes simanis-copy-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes silapandu-progress { from { width: 0 } to { width: 100% } }
+@keyframes spin-slow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+.animate-spin-slow { animation: spin-slow 8s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-spin-slow { animation: none; } }
+.silapandu-progress-fill { animation: silapandu-progress 1s ease-out .2s both; }
+@keyframes simanis-intro-exit {
+    to { opacity: 0; visibility: hidden; }
+}
+
+.simanis-intro-mark {
+    animation: simanis-mark-draw .8s cubic-bezier(.2,.7,.2,1) both;
+}
+
+.simanis-intro-copy {
+    animation: simanis-copy-rise .7s .55s ease-out both;
+}
+
+.simanis-intro-tagline {
+    animation: simanis-copy-rise .7s .8s ease-out both;
+}
+
+.simanis-intro-finish {
+    animation: simanis-intro-exit .45s 2.55s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .simanis-intro-mark,
+    .simanis-intro-copy,
+    .simanis-intro-tagline,
+    .simanis-intro-finish {
+        animation: none;
+    }
+}
