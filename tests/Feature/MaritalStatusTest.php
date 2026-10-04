@@ -103,7 +103,7 @@ class MaritalStatusTest extends TestCase
         $priaNik = '3201' . str_pad((string) (100000000 + $counter * 2), 12, '0', STR_PAD_LEFT);
         $wanitaNik = '3201' . str_pad((string) (100000001 + $counter * 2), 12, '0', STR_PAD_LEFT);
         return [
-            'registration_path' => 'DALAM_DESA', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Masjid',
+            'registration_path' => 'NIKAH_BEDOL', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Masjid',
             'pria_nik' => $priaNik, 'pria_name' => 'Pria', 'pria_birth_place' => 'Semarang', 'pria_birth_date' => '1995-01-01', 'pria_marital_status' => $status, 'pria_address' => 'Jl', 'pria_province_id' => $p->id, 'pria_regency_id' => $r->id, 'pria_district_id' => $d->id, 'pria_village_id' => $v->id,
             'wanita_nik' => $wanitaNik, 'wanita_name' => 'Wanita', 'wanita_birth_place' => 'Semarang', 'wanita_birth_date' => '1997-01-01', 'wanita_marital_status' => 'BELUM KAWIN', 'wanita_address' => 'Jl', 'wanita_province_id' => $p->id, 'wanita_regency_id' => $r->id, 'wanita_district_id' => $d->id, 'wanita_village_id' => $v->id,
             'pria_father_status' => 'HIDUP', 'pria_father_name' => 'Ayah Pria', 'pria_mother_status' => 'HIDUP', 'pria_mother_name' => 'Ibu Pria',

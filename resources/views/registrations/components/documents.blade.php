@@ -6,8 +6,7 @@
 <div
     x-data="{
         n5Modal: false,
-        n6Modal: false,
-        deathModal: false
+        n6Modal: false
     }"
     class="space-y-8"
 >
@@ -379,77 +378,11 @@
         @endif
 
         {{-- =================================================
-             SURAT KEMATIAN
-        ================================================== --}}
-        @if(isset($requirements['death']) && $requirements['death']['required'])
-
-            <div class="rounded-xl border border-red-200 bg-red-50">
-
-                <div class="p-4">
-
-                    <div class="flex items-start gap-3">
-
-                        <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
-                            !
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-
-                            <p class="text-sm font-bold text-gray-900">
-                                Surat Kematian
-                            </p>
-
-                            <p class="mt-1 text-xs text-gray-600">
-                                Dokumen pendukung untuk orang tua yang berstatus meninggal.
-                            </p>
-
-                            {{-- Daftar parent meninggal --}}
-                            <div class="mt-3 space-y-2">
-
-                                @foreach($requirements['death']['parents'] as $deathParent)
-
-                                    <div class="rounded-lg border border-red-100 bg-white px-3 py-2">
-
-                                        <p class="text-xs font-semibold text-gray-800">
-
-                                            {{ $deathParent['parent_role'] === 'AYAH' ? 'Ayah' : 'Ibu' }}
-
-                                            Catin
-                                            {{ $deathParent['catin_role'] === 'PRIA' ? 'Pria' : 'Wanita' }}
-
-                                        </p>
-
-                                        <p class="text-xs text-gray-500">
-                                            {{ $deathParent['parent_name'] }}
-                                        </p>
-
-                                    </div>
-
-                                @endforeach
-
-                            </div>
-
-                            <span class="mt-3 inline-flex rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-semibold text-red-700">
-                                Perlu diperiksa
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        @endif
-
-        {{-- =================================================
              TIDAK ADA DOKUMEN KONDISIONAL
         ================================================== --}}
         @if(
             (!isset($requirements['n5']) || !$requirements['n5']['required'])
             && (!isset($requirements['n6']) || !$requirements['n6']['required'])
-            && (!isset($requirements['death']) || !$requirements['death']['required'])
         )
 
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">

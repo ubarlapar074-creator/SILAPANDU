@@ -56,7 +56,7 @@ class PersistenceSilentLossTest extends TestCase
 
     public function test_registration_document_fillable_issue_date_and_created_by(): void
     {
-        $reg = Registration::create(['registration_number' => 'REG-PERS-1', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $reg = Registration::create(['registration_number' => 'REG-PERS-1', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $doc = RegistrationDocument::create(['registration_id' => $reg->id, 'document_type' => 'N1', 'document_number' => 'N1-001', 'issue_date' => '2026-09-01', 'signed_by' => 'Lurah', 'signed_by_position' => 'Kepala', 'status' => 'PUBLISHED', 'created_by' => null]);
         $doc->refresh();
         $this->assertEquals('2026-09-01', $doc->issue_date->format('Y-m-d'));
@@ -68,7 +68,7 @@ class PersistenceSilentLossTest extends TestCase
 
     public function test_n6_fillable_extra_fields_and_update(): void
     {
-        $reg = Registration::create(['registration_number' => 'REG-PERS-2', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $reg = Registration::create(['registration_number' => 'REG-PERS-2', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $n6 = N6Document::create([
             'registration_id' => $reg->id, 'deceased_name' => 'Alm', 'deceased_bin_binti' => 'Bin X', 'deceased_nik' => '3201010101010099', 'deceased_birth_place' => 'Semarang', 'deceased_birth_date' => '1960-01-01',
             'deceased_nationality' => 'WNI', 'deceased_religion' => 'Islam', 'deceased_occupation' => 'Petani', 'deceased_address' => 'Jl', 'death_date' => '2025-01-01', 'death_place' => 'RS',

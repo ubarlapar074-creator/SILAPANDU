@@ -245,8 +245,19 @@ class RegistrationAutosaveService
     private function updateWitnesses(Registration $registration, array $validated): void
     {
         if (!array_key_exists('witnesses', $validated) || !is_array($validated['witnesses'])) return;
-        $input = array_values(array_filter($validated['witnesses'], fn($w) => is_array($w) && !empty(array_filter($w, fn($v) => $v !== null && $v !== ''))));
-        $input = array_values(array_filter($input, fn($w) => trim((string)($w['name'] ?? '')) !== ''));
+        $rawInput = is_array($validated['witnesses']) ? $validated['witnesses'] : [];
+        $filtered = [];
+        foreach ($rawInput as $idx => $w) {
+            if (!is_array($w)) continue;
+            $hasAny = !empty(array_filter($w, fn($v) => $v !== null && $v !== ''));
+            if (!$hasAny) continue;
+            $name = trim((string) ($w['name'] ?? ''));
+            if ($name === '') {
+                throw ValidationException::withMessages(["witnesses.$idx.name" => "Nama saksi ke-".($idx+1)." wajib diisi jika data saksi diisi."]);
+            }
+            $filtered[] = $w;
+        }
+        $input = array_values($filtered);
         $existing = $registration->witnesses->sortBy('id')->values();
         if (count($input) < $existing->count()) {
             foreach ($existing->slice(count($input)) as $del) $del->delete();

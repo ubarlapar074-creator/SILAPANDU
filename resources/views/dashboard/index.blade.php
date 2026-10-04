@@ -257,27 +257,10 @@
 
                             {{-- Jalur --}}
                             <td class="whitespace-nowrap px-5 py-4">
-
-                                @if ($reg->registration_path === 'DALAM_DESA')
-
-                                    <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                                        DALAM DESA
-                                    </span>
-
-                                @elseif ($reg->registration_path === 'ANDON')
-
-                                    <span class="inline-flex rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700">
-                                        ANDON
-                                    </span>
-
-                                @else
-
-                                    <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
-                                        {{ $reg->registration_path ?? '-' }}
-                                    </span>
-
-                                @endif
-
+                                @php $pathLabel = \App\Models\Registration::pathLabel($reg->registration_path); $pathColor = match($reg->registration_path) { 'NIKAH_BEDOL','DALAM_DESA' => 'bg-blue-50 text-blue-700', 'NIKAH_KANTOR' => 'bg-emerald-50 text-emerald-700', 'PEMBUATAN_ANDON_NIKAH','ANDON' => 'bg-purple-50 text-purple-700', default => 'bg-gray-100 text-gray-600' }; @endphp
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $pathColor }}">
+                                    {{ $pathLabel }}
+                                </span>
                             </td>
 
 

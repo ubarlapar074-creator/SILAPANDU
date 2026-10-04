@@ -353,63 +353,9 @@
         </template>
 
         {{-- =====================================================
-             SURAT KEMATIAN
-        ====================================================== --}}
-        <template x-if="deathRequired">
-
-            <div class="border border-red-200 bg-red-50 rounded-lg p-4">
-
-                <div class="flex items-start gap-3">
-
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700 font-bold">
-                        !
-                    </span>
-
-                    <div class="flex-1">
-
-                        <p class="font-bold text-red-900">
-                            Surat Kematian
-                        </p>
-
-                        <p class="text-xs text-red-700 mt-1">
-                            Diperlukan karena terdapat orang tua yang
-                            berstatus meninggal.
-                        </p>
-
-                        <div class="mt-3 space-y-2">
-
-                            <template x-for="parent in deceasedParents" :key="parent.key">
-
-                                <div class="bg-white border border-red-100 rounded p-3">
-
-                                    <p
-                                        class="text-xs font-semibold text-slate-800"
-                                        x-text="parent.label"
-                                    ></p>
-
-                                    <p
-                                        class="text-xs text-slate-500 mt-1"
-                                        x-text="parent.name"
-                                    ></p>
-
-                                </div>
-
-                            </template>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </template>
-
-        {{-- =====================================================
              TIDAK ADA KONDISIONAL
         ====================================================== --}}
-        <template x-if="!n5Required && !n6Required && !deathRequired">
+        <template x-if="!n5Required && !n6Required">
 
             <div class="border border-emerald-200 bg-emerald-50 rounded-lg p-4">
 
@@ -645,7 +591,6 @@ function reviewDocuments() {
 
         n5Required: false,
         n6Required: false,
-        deathRequired: false,
 
         agePria: null,
         ageWanita: null,
@@ -655,8 +600,6 @@ function reviewDocuments() {
         guardianRelationship: '',
 
         n6Reason: '',
-
-        deceasedParents: [],
 
         init() {
             // Mencegah race condition saat DOM belum sepenuhnya ter-mount
@@ -807,69 +750,6 @@ function reviewDocuments() {
                     'sehingga diperlukan N6.';
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | SURAT KEMATIAN
-            |--------------------------------------------------------------------------
-            */
-
-            this.deceasedParents = [];
-
-            const parents = [
-
-                {
-                    status: (this.getValue('pria_father_status') || '').toUpperCase(),
-                    name: this.getValue('pria_father_name'),
-                    role: 'Ayah',
-                    catin: 'Pria'
-                },
-
-                {
-                    status: (this.getValue('pria_mother_status') || '').toUpperCase(),
-                    name: this.getValue('pria_mother_name'),
-                    role: 'Ibu',
-                    catin: 'Pria'
-                },
-
-                {
-                    status: (this.getValue('wanita_father_status') || '').toUpperCase(),
-                    name: this.getValue('wanita_father_name'),
-                    role: 'Ayah',
-                    catin: 'Wanita'
-                },
-
-                {
-                    status: (this.getValue('wanita_mother_status') || '').toUpperCase(),
-                    name: this.getValue('wanita_mother_name'),
-                    role: 'Ibu',
-                    catin: 'Wanita'
-                }
-
-            ];
-
-            parents.forEach((parent, index) => {
-
-                if (parent.status === 'MENINGGAL') {
-                    let nm = parent.name || 'Nama tidak tersedia';
-                    if (!/\(Almh?\)/i.test(nm)) nm += parent.role === 'Ayah' ? ' (Alm)' : ' (Almh)';
-
-                    this.deceasedParents.push({
-
-                        key: index,
-
-                        label:
-                            `${parent.role} Catin ${parent.catin}`,
-
-                        name: nm
-
-                    });
-
-                }
-
-            });
-
-            this.deathRequired =
-                this.deceasedParents.length > 0;
         }
     };
 }

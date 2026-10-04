@@ -30,7 +30,24 @@ class RegistrationKtpCopyController extends Controller
             'ktp.*' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
         ]);
 
-        $files = $request->file('ktp', []);
+        $allowed = array_keys(RegistrationKtpCopy::SLOTS);
+        $uploaded = $request->file('ktp', []);
+        if (!is_array($uploaded)) $uploaded = $uploaded ? [$uploaded] : [];
+        $inputKeys = array_keys($uploaded);
+        if (empty($inputKeys) && is_array($request->input('ktp'))) {
+            $inputKeys = array_keys($request->input('ktp'));
+        }
+        $invalid = array_diff($inputKeys, $allowed);
+        if (!empty($invalid)) {
+            abort(422, 'Slot KTP tidak valid: '.implode(', ', $invalid));
+        }
+        foreach ($inputKeys as $k) {
+            if (str_contains((string) $k, '/') || str_contains((string) $k, '\\') || str_contains((string) $k, '..') || $k !== trim($k)) {
+                abort(422, 'Slot KTP tidak valid.');
+            }
+        }
+
+        $files = $uploaded;
 
         foreach (RegistrationKtpCopy::SLOTS as $slot => $label) {
             if (! isset($files[$slot]) || ! $files[$slot] || ! $files[$slot]->isValid()) {

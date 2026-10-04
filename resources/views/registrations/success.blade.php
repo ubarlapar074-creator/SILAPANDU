@@ -432,69 +432,11 @@
                     @endif
 
                     {{-- =================================================
-                         SURAT KEMATIAN
-                    ================================================== --}}
-                    @if (!empty($requirements['death']['required']))
-
-                        <div class="rounded-xl border border-red-200 bg-red-50 p-5">
-
-                            <div class="flex gap-3">
-
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold text-red-700">
-                                    !
-                                </div>
-
-                                <div class="flex-1">
-
-                                    <h3 class="font-bold text-red-900">
-                                        Surat Kematian Diperlukan
-                                    </h3>
-
-                                    <p class="mt-1 text-sm text-red-700">
-                                        Terdapat orang tua yang tercatat
-                                        berstatus meninggal.
-                                    </p>
-
-                                    @if (!empty($requirements['death']['parents']))
-
-                                        <div class="mt-4 space-y-2">
-
-                                            @foreach ($requirements['death']['parents'] as $parent)
-
-                                                <div class="rounded-lg border border-red-100 bg-white p-3">
-
-                                                    <p class="text-sm font-semibold text-gray-800">
-                                                        {{ $parent['parent_role'] ?? '-' }}
-                                                        Catin {{ $parent['catin_role'] ?? '-' }}
-                                                    </p>
-
-                                                    <p class="mt-1 text-xs text-gray-500">
-                                                        {{ $parent['parent_name'] ?? '-' }}
-                                                    </p>
-
-                                                </div>
-
-                                            @endforeach
-
-                                        </div>
-
-                                    @endif
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    @endif
-
-                    {{-- =================================================
                          SEMUA REQUIREMENT NORMAL
                     ================================================== --}}
                     @if (
                         empty($requirements['n5']['required']) &&
-                        empty($requirements['n6']['required']) &&
-                        empty($requirements['death']['required'])
+                        empty($requirements['n6']['required'])
                     )
 
                         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5">

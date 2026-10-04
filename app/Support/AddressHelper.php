@@ -47,26 +47,37 @@ class AddressHelper
     /**
      * Bersihkan input NIK: hanya digit 0-9, kosong jadi null.
      * Dipakai sebelum validasi agar "3201-0101..." tetap lolos digits:16.
+     * Handle spasi, dash, newline, fullwidth (０-９), invisible unicode.
      */
     public static function sanitizeNikInputs(\Illuminate\Http\Request $request): void
     {
         $keys = ['pria_nik', 'wanita_nik', 'pria_father_nik', 'pria_mother_nik', 'wanita_father_nik', 'wanita_mother_nik', 'guardian_nik'];
         foreach ($keys as $key) {
-            if (!$request->has($key)) continue;
+            if (!$request->exists($key)) continue;
             $raw = $request->input($key);
             if ($raw === null || $raw === '') continue;
-            $digits = preg_replace('/\D/', '', (string) $raw);
+            $digits = self::normalizeNikValue($raw);
             $request->merge([$key => $digits === '' ? null : $digits]);
         }
         $witnesses = $request->input('witnesses');
         if (!is_array($witnesses)) return;
+        $changed = false;
         foreach ($witnesses as $i => $w) {
             if (!is_array($w) || !array_key_exists('nik', $w)) continue;
             $raw = $w['nik'];
             if ($raw === null || $raw === '') continue;
-            $digits = preg_replace('/\D/', '', (string) $raw);
+            $digits = self::normalizeNikValue($raw);
             $witnesses[$i]['nik'] = $digits === '' ? null : $digits;
+            $changed = true;
         }
-        $request->merge(['witnesses' => $witnesses]);
+        if ($changed) $request->merge(['witnesses' => $witnesses]);
+    }
+
+    private static function normalizeNikValue(mixed $raw): string
+    {
+        $str = trim((string) $raw);
+        $str = strtr($str, ['０'=>'0','１'=>'1','２'=>'2','３'=>'3','４'=>'4','５'=>'5','６'=>'6','７'=>'7','８'=>'8','９'=>'9']);
+        $str = preg_replace('/[^\d]/u', '', $str) ?? '';
+        return $str;
     }
 }

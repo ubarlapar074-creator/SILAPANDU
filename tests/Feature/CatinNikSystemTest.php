@@ -38,7 +38,7 @@ class CatinNikSystemTest extends TestCase
     {
         $r = $region;
         return [
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'marriage_date' => '2026-12-20',
             'marriage_time' => '09:00',
             'marriage_dowry' => 'Emas 10 gram',
@@ -121,7 +121,7 @@ class CatinNikSystemTest extends TestCase
     public function test_lookup_returns_existing_data_with_parents_and_region(): void
     {
         $r = $this->region();
-        $reg = Registration::create(['registration_number' => 'REG-LOOKUP-1', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $reg = Registration::create(['registration_number' => 'REG-LOOKUP-1', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $catin = Catin::create(['registration_id' => $reg->id, 'role' => 'PRIA', 'nik' => '3201010101010088', 'name' => 'Lookup Pria', 'birth_place' => 'Semarang', 'birth_date' => '1995-01-01', 'marital_status' => 'BELUM_KAWIN', 'address' => 'Jl', 'province_id' => $r['province']->id, 'regency_id' => $r['regency']->id, 'district_id' => $r['district']->id, 'village_id' => $r['village']->id]);
         CatinParent::create(['catin_id' => $catin->id, 'role' => 'AYAH', 'status' => 'HIDUP', 'name' => 'Ayah Lookup', 'nik' => '3201010101010098', 'birth_place' => 'Semarang', 'birth_date' => '1970-01-01', 'address' => 'Jl Ayah', 'province_id' => $r['province']->id, 'regency_id' => $r['regency']->id, 'district_id' => $r['district']->id, 'village_id' => $r['village']->id]);
         CatinParent::create(['catin_id' => $catin->id, 'role' => 'IBU', 'status' => 'HIDUP', 'name' => 'Ibu Lookup', 'address' => 'Jl Ibu', 'province_id' => $r['province']->id, 'regency_id' => $r['regency']->id, 'district_id' => $r['district']->id, 'village_id' => $r['village']->id]);
@@ -188,7 +188,7 @@ class CatinNikSystemTest extends TestCase
 
     public function test_view_contains_autosave_900ms_and_dialog_options(): void
     {
-        $reg = Registration::create(['registration_number' => 'REG-DIALOG-1', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $reg = Registration::create(['registration_number' => 'REG-DIALOG-1', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $r = $this->region();
         $catin = Catin::create(['registration_id' => $reg->id, 'role' => 'PRIA', 'nik' => '3201010101010051', 'name' => 'Dialog Pria', 'birth_place' => 'Semarang', 'birth_date' => '1995-01-01', 'marital_status' => 'BELUM_KAWIN', 'address' => 'Jl', 'province_id' => $r['province']->id, 'regency_id' => $r['regency']->id, 'district_id' => $r['district']->id, 'village_id' => $r['village']->id]);
         $reg->catins()->syncWithoutDetaching([$catin->id]);
@@ -217,7 +217,7 @@ class CatinNikSystemTest extends TestCase
         $sharedCatin = $registration->catins()->where('nik', '3201010101010041')->firstOrFail();
         $otherRegistration = Registration::create([
             'registration_number' => 'REG-SHARED-CATIN',
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-12-21',
             'marriage_time' => '10:00',
@@ -304,7 +304,7 @@ class CatinNikSystemTest extends TestCase
         $r = $this->region();
         $otherRegistration = Registration::create([
             'registration_number' => 'REG-ROLE-SOURCE',
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-12-21',
             'marriage_time' => '10:00',
@@ -343,7 +343,7 @@ class CatinNikSystemTest extends TestCase
     {
         $registration = Registration::create([
             'registration_number' => 'REG-N6-SYNC',
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-12-20',
             'marriage_time' => '09:00',

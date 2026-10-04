@@ -29,7 +29,11 @@ export const NikahDraft = {
     },
     apply(ctx){
         const d=ctx._pendingDraft; if(!d) return;
-        ctx.step=d.step||1;
+        const rawStep = parseInt(d.step, 10) || 1;
+        const isAndon = (d.values?.registration_path ?? ctx.registrationPath) === 'PEMBUATAN_ANDON_NIKAH';
+        const max = isAndon ? 5 : 7;
+        ctx.step = Math.min(Math.max(rawStep, 1), max);
+        if (isAndon && ctx.step > 5) ctx.step = 5;
         ctx.$nextTick(async ()=>{
             const form=ctx.$refs.editForm; if(!form) return;
             const regionGroups={};
@@ -90,7 +94,14 @@ export const NikahDraft = {
             const m=ctx.autosaveUrl.match(/registrations\/(\d+)\/autosave/);
             if(!m) return false;
             const s=sessionStorage.getItem('nikah:step:'+m[1]);
-            if(s && !isNaN(parseInt(s,10))){ const n=parseInt(s,10); if(n>=1&&n<=ctx.totalSteps){ ctx.step=n; return true; } }
+            if(s && !isNaN(parseInt(s,10))){
+                let n=parseInt(s,10);
+                const max = ctx.totalSteps;
+                if(n<1) n=1; if(n>max) n=max;
+                if(ctx.isAndon && n>5) n=5;
+                if(!ctx.isAndon && ctx.isAndon!==undefined) {}
+                ctx.step=n; return true;
+            }
         }catch(e){} return false;
     },
     init(ctx, hasOld){

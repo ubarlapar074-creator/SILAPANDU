@@ -62,7 +62,25 @@
                 <a href="{{ route('settings.document-numbers.edit') }}" class="text-xs font-medium text-slate-500 hover:text-emerald-700">Pengaturan → Penomoran Surat</a>
             </div>
         </div>
+            @php $isAndonDetail = ($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH'; @endphp
         <div class="flex flex-wrap gap-2">
+            @if($isAndonDetail)
+                <a href="{{ route('registrations.documents.n1.print', $registration->id) }}" class="px-3 py-2 text-xs font-medium bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition shadow-xs">
+                    🖨️ Cetak N1 Andon (Surat Keterangan Andon Nikah)
+                </a>
+                <a href="{{ route('registrations.documents.n4.print', $registration->id) }}" class="px-3 py-2 text-xs font-medium bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition shadow-xs">
+                    🖨️ Cetak N4 (Persetujuan Calon Pengantin)
+                </a>
+                <a href="{{ route('registrations.documents.n5.print', $registration->id) }}" class="px-3 py-2 text-xs font-medium bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition shadow-xs">
+                    🖨️ Cetak N5 (IZIN ORTU)
+                </a>
+                <a href="{{ route('registrations.documents.surat-pernyataan-status.print', [$registration->id, 'PRIA']) }}" target="_blank" class="px-3 py-2 text-xs font-medium bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-800 hover:text-white transition shadow-xs">
+                    🖨️ Pernyataan Status — Pria
+                </a>
+                <a href="{{ route('registrations.documents.surat-pernyataan-status.print', [$registration->id, 'WANITA']) }}" target="_blank" class="px-3 py-2 text-xs font-medium bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-800 hover:text-white transition shadow-xs">
+                    🖨️ Pernyataan Status — Wanita
+                </a>
+            @else
             <!-- Contoh tombol cetak, arahkan ke route cetak masing-masing dokumen -->
             <a href="{{ route('registrations.documents.data', $registration->id) }}" class="px-3 py-2 text-xs font-medium bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition shadow-xs">
                 🖨️ Cetak Data Pendaftaran
@@ -113,6 +131,7 @@
             <a href="{{ route('registrations.documents.surat-pernyataan-status.print', [$registration->id, 'WANITA']) }}" target="_blank" class="px-3 py-2 text-xs font-medium bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-800 hover:text-white transition shadow-xs">
                 🖨️ Pernyataan Status — Wanita
             </a>
+            @endif
         </div>
     </div>
 
@@ -164,7 +183,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                 <div>
                     <span class="text-gray-500 block">Jalur Pendaftaran</span>
-                    <span class="font-medium text-gray-800">{{ $registration->registration_path }}</span>
+                    <span class="font-medium text-gray-800">{{ \App\Models\Registration::pathLabel($registration->registration_path) }}</span>
                 </div>
                 <div>
                     <span class="text-gray-500 block">Tanggal & Waktu Nikah</span>

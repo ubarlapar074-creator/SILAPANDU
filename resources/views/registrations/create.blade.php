@@ -38,7 +38,9 @@
 <div
     x-data="{
         step: {{ old('_step', 1) }},
-        totalSteps: 7,
+        registrationPath: '{{ $registrationPathValue }}',
+        get isAndon() { return this.registrationPath === 'PEMBUATAN_ANDON_NIKAH'; },
+        get totalSteps() { return this.isAndon ? 5 : 7; },
         isEditMode: {{ $isEditMode ? 'true' : 'false' }},
         autosaveUrl: '{{ $isEditMode ? route('registrations.autosave', $registration->id) : '' }}',
         autosaveStatus: '',
@@ -64,8 +66,43 @@
         sebabWali: @js(old('guardian_sebab_wali', $guardian?->sebab_wali ?? '')),
         init() { 
             if (this.relationship) this.prevSebabDefault = this.getSebabDefault(this.relationship);
+            this.normalizeStepForCurrentPath();
             this.initPersist(); 
             if(this.isEditMode) window.addEventListener('beforeunload', (e)=>{ if(this.hasUnsaved){ e.preventDefault(); e.returnValue=''; } });
+        },
+        normalizeStepForCurrentPath() {
+            if (this.isAndon) {
+                if (this.step < 1) this.step = 1;
+                if (this.step > 5) this.step = 5;
+            } else {
+                if (this.step < 1) this.step = 1;
+                if (this.step > 7) this.step = 7;
+            }
+        },
+        handleRegistrationPathChange(e) {
+            const newVal = e.target.value;
+            const wasAndon = this.isAndon;
+            this.registrationPath = newVal;
+            const nowAndon = newVal === 'PEMBUATAN_ANDON_NIKAH';
+            if (!wasAndon && nowAndon) {
+                if (this.step === 7) this.step = 5;
+                else if (this.step === 6) this.step = 5;
+                else if (this.step === 5) this.step = 4;
+                else if (this.step === 4) this.step = 3;
+                else if (this.step === 3) this.step = 2;
+                else if (this.step === 2) this.step = 1;
+                else if (this.step === 1) this.step = 1;
+                if (this.step < 1) this.step = 1;
+                if (this.step > 5) this.step = 5;
+            } else if (wasAndon && !nowAndon) {
+                if (this.step === 1) this.step = 2;
+                else if (this.step === 2) this.step = 3;
+                else if (this.step === 3) this.step = 4;
+                else if (this.step === 4) this.step = 5;
+                else if (this.step === 5) this.step = 7;
+                if (this.step < 1) this.step = 1;
+                if (this.step > 7) this.step = 7;
+            }
         },
         prevSebabDefault: '',
         sebabDefaults: {
@@ -94,9 +131,9 @@
         },
 
         handleStepWarning() {
-            if (this.step === 6 && this.isFatherMeninggal) {
+            if (!this.isAndon && this.step === 6 && this.isFatherMeninggal) {
                 this.showN6Alert = true;
-            } else if (this.step !== 6 || !this.isFatherMeninggal) {
+            } else if (this.step !== 6 || !this.isFatherMeninggal || this.isAndon) {
                 this.showN6Alert = false;
             }
         },
@@ -191,15 +228,28 @@
             }
         },
 
-        validateCurrentStep() {
-            const form = this.$refs.editForm;
-            if (!form) return true;
+        getVisibleStepSection() {
             const sections = [...this.$el.querySelectorAll('section[x-show]')];
-            let stepSection = sections.find((section) => {
+            const visible = sections.filter(s => {
+                const style = window.getComputedStyle(s);
+                return style.display !== 'none' && s.offsetParent !== null;
+            });
+            if (visible.length === 1) return visible[0];
+            for (const section of sections) {
+                const style = window.getComputedStyle(section);
+                if (style.display !== 'none' && style.visibility !== 'hidden' && section.offsetParent !== null) return section;
+            }
+            let fallback = sections.find((section) => {
                 const show = section.getAttribute('x-show') || '';
                 return show.includes(`step === ${this.step}`);
             });
-            if (!stepSection && sections.length >= this.step) stepSection = sections[this.step - 1];
+            if (!fallback && sections.length >= this.step) fallback = sections[this.step - 1];
+            return fallback;
+        },
+        validateCurrentStep() {
+            const form = this.$refs.editForm;
+            if (!form) return true;
+            const stepSection = this.getVisibleStepSection();
             const fields = stepSection ? [...stepSection.querySelectorAll('input, select, textarea')] : [...form.querySelectorAll('input, select, textarea')];
             const isVisible = (el) => {
                 if (el.disabled || el.hidden) return false;
@@ -241,7 +291,12 @@
         },
 
         nextStep() {
-            if (this.step < this.totalSteps && this.validateCurrentStep()) {
+            if (!this.validateCurrentStep()) return;
+            if (!this.registrationPath || !this.registrationPath.trim()) {
+                const sel = document.getElementById('registration_path_main');
+                sel?.reportValidity(); sel?.focus(); return;
+            }
+            if (this.step < this.totalSteps) {
                 this.step++;
                 this.handleStepWarning();
                 this.persistStep(); this.scheduleDraft();
@@ -267,15 +322,6 @@
             this.pendingBackUrl = url;
             this.pendingBackStep = null;
             this.showBackDialog = true;
-        },
-
-        doPrevStep() {
-            if (this.step > 1) {
-                this.step--;
-                this.handleStepWarning();
-                this.persistStep(); this.scheduleDraft();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
         },
 
         prevStep() {
@@ -325,24 +371,37 @@
             this.pendingBackUrl = null;
         },
 
-        goToStep(s) {
-            if (s >= 1 && s <= this.totalSteps) {
-                if (this.isEditMode && this.hasUnsaved && s < this.step) {
-                    this.pendingBackStep = s;
-                    this.pendingBackUrl = null;
-                    this.showBackDialog = true;
-                    return;
-                }
-                this.step = s;
-                this.handleStepWarning();
-                this.persistStep(); this.scheduleDraft();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+          goToStep(s) {
+            if (s < 1 || s > this.totalSteps) return;
+            if (this.isEditMode && this.hasUnsaved && s < this.step) {
+                this.pendingBackStep = s;
+                this.pendingBackUrl = null;
+                this.showBackDialog = true;
+                return;
             }
+            this.step = s;
+            this.handleStepWarning();
+            this.persistStep(); this.scheduleDraft();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        doPrevStep() {
+            if (this.step > 1) { this.step--; this.handleStepWarning(); this.persistStep(); this.scheduleDraft(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
         }
     }"
     x-init="init()"
     class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
 >
+
+    <div class="border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
+        <label for="registration_path_main" class="block text-sm font-medium text-gray-700">Jalur Pendaftaran <span class="text-red-500">*</span></label>
+        <select id="registration_path_main" name="registration_path" x-model="registrationPath" @change="handleRegistrationPathChange($event)" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <option value="">Pilih Jalur Pendaftaran</option>
+            <option value="NIKAH_BEDOL" @selected($registrationPathValue === 'NIKAH_BEDOL')>Nikah Bedol</option>
+            <option value="NIKAH_KANTOR" @selected($registrationPathValue === 'NIKAH_KANTOR')>Nikah Kantor</option>
+            <option value="PEMBUATAN_ANDON_NIKAH" @selected($registrationPathValue === 'PEMBUATAN_ANDON_NIKAH')>Pembuatan Andon Nikah</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500" x-show="isAndon" x-cloak>Flow Andon: 5 langkah — Catin Pria → Ortu Pria → Catin Wanita → Ortu Wanita → Dokumen. Data akad tidak diperlukan.</p>
+    </div>
 
     {{-- STEP INDICATOR --}}
     <div class="border-b border-gray-200 bg-gray-50 px-4 py-4 sm:px-6">
@@ -375,96 +434,119 @@
 
         <input type="hidden" name="_step" x-bind:value="step">
 
-        {{-- STEP 1 — INFORMASI PENDAFTARAN & LOKASI AKAD --}}
+        {{-- STEP 1 --}}
         <section x-show="step === 1" x-cloak x-transition.opacity>
-            <div class="mb-6">
-                <h2 class="text-lg font-bold text-gray-900">Informasi Pendaftaran & Lokasi Akad</h2>
-                <p class="mt-1 text-sm text-gray-500">Tentukan jalur, rencana tanggal, mahar, serta lokasi pelaksanaan pernikahan.</p>
-            </div>
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <template x-if="isAndon">
+                <div>@include('registrations.components.catin-pria')</div>
+            </template>
+            <template x-if="!isAndon">
                 <div>
-                    <label for="registration_path" class="block text-sm font-medium text-gray-700">Jalur Pendaftaran <span class="text-red-500">*</span></label>
-                    <select id="registration_path" name="registration_path" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                        <option value="">Pilih Jalur Pendaftaran</option>
-                        <option value="DALAM_DESA" @selected($registrationPathValue === 'DALAM_DESA')>Dalam Desa</option>
-                        <option value="ANDON" @selected($registrationPathValue === 'ANDON')>Andon Nikah</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="marriage_date" class="block text-sm font-medium text-gray-700">Rencana Tanggal Nikah <span class="text-red-500">*</span></label>
-                    <input id="marriage_date" type="date" name="marriage_date" value="{{ $marriageDateValue }}" placeholder="dd/mm/yyyy" lang="id-ID" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label for="marriage_time" class="block text-sm font-medium text-gray-700">Waktu Akad <span class="text-red-500">*</span></label>
-                    <input id="marriage_time" type="time" name="marriage_time" value="{{ $marriageTimeValue }}" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <div class="md:col-span-2" x-data="{ dowryType: '{{ $marriageDowryTypeValue }}' }">
-                    <label for="marriage_dowry_type" class="block text-sm font-medium text-gray-700">Mahar / Mas Kawin <span class="text-red-500">*</span></label>
-                    <select id="marriage_dowry_type" name="marriage_dowry_type" x-model="dowryType" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                        <option value="">Pilih jenis mahar</option>
-                        <option value="UANG_EMAS">Uang + Emas</option>
-                        <option value="UANG">Uang saja</option>
-                        <option value="EMAS">Emas saja</option>
-                        <option value="LAINNYA">Lainnya</option>
-                    </select>
-                    @error('marriage_dowry_type') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    <input type="hidden" name="marriage_dowry" value="{{ $marriageDowryValue }}">
-                    <div x-show="dowryType === 'UANG_EMAS' || dowryType === 'UANG'" x-cloak class="mt-3">
-                        <label for="marriage_dowry_money" class="block text-xs font-medium text-gray-600">Nominal uang</label>
-                        <input id="marriage_dowry_money" type="text" name="marriage_dowry_money" value="{{ $marriageDowryMoneyValue }}" placeholder="Contoh: Rp 1.000.000" :required="dowryType === 'UANG_EMAS' || dowryType === 'UANG'" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-bold text-gray-900">Informasi Pendaftaran & Lokasi Akad</h2>
+                        <p class="mt-1 text-sm text-gray-500">Tentukan rencana tanggal, mahar, serta lokasi pelaksanaan pernikahan.</p>
                     </div>
-                    <div x-show="dowryType === 'UANG_EMAS' || dowryType === 'EMAS'" x-cloak class="mt-3">
-                        <label for="marriage_dowry_gold" class="block text-xs font-medium text-gray-600">Berat emas</label>
-                        <input id="marriage_dowry_gold" type="text" name="marriage_dowry_gold" value="{{ $marriageDowryGoldValue }}" placeholder="Contoh: 3,5 gram" :required="dowryType === 'UANG_EMAS' || dowryType === 'EMAS'" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="marriage_date" class="block text-sm font-medium text-gray-700">Rencana Tanggal Nikah <span class="text-red-500">*</span></label>
+                            <input id="marriage_date" type="date" name="marriage_date" value="{{ $marriageDateValue }}" placeholder="dd/mm/yyyy" lang="id-ID" :required="!isAndon" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label for="marriage_time" class="block text-sm font-medium text-gray-700">Waktu Akad <span class="text-red-500">*</span></label>
+                            <input id="marriage_time" type="time" name="marriage_time" value="{{ $marriageTimeValue }}" :required="!isAndon" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        </div>
+                        <div class="md:col-span-2" x-data="{ dowryType: '{{ $marriageDowryTypeValue }}' }">
+                            <label for="marriage_dowry_type" class="block text-sm font-medium text-gray-700">Mahar / Mas Kawin <span class="text-red-500">*</span></label>
+                            <select id="marriage_dowry_type" name="marriage_dowry_type" x-model="dowryType" :required="!isAndon" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <option value="">Pilih jenis mahar</option>
+                                <option value="UANG_EMAS">Uang + Emas</option>
+                                <option value="UANG">Uang saja</option>
+                                <option value="EMAS">Emas saja</option>
+                                <option value="LAINNYA">Lainnya</option>
+                            </select>
+                            @error('marriage_dowry_type') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input type="hidden" name="marriage_dowry" value="{{ $marriageDowryValue }}">
+                            <div x-show="dowryType === 'UANG_EMAS' || dowryType === 'UANG'" x-cloak class="mt-3">
+                                <label for="marriage_dowry_money" class="block text-xs font-medium text-gray-600">Nominal uang</label>
+                                <input id="marriage_dowry_money" type="text" name="marriage_dowry_money" value="{{ $marriageDowryMoneyValue }}" placeholder="Contoh: Rp 1.000.000" :required="!isAndon && (dowryType === 'UANG_EMAS' || dowryType === 'UANG')" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                            </div>
+                            <div x-show="dowryType === 'UANG_EMAS' || dowryType === 'EMAS'" x-cloak class="mt-3">
+                                <label for="marriage_dowry_gold" class="block text-xs font-medium text-gray-600">Berat emas</label>
+                                <input id="marriage_dowry_gold" type="text" name="marriage_dowry_gold" value="{{ $marriageDowryGoldValue }}" placeholder="Contoh: 3,5 gram" :required="!isAndon && (dowryType === 'UANG_EMAS' || dowryType === 'EMAS')" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                            </div>
+                            <div x-show="dowryType === 'LAINNYA'" x-cloak class="mt-3">
+                                <label for="marriage_dowry_other" class="block text-xs font-medium text-gray-600">Keterangan mahar</label>
+                                <input id="marriage_dowry_other" type="text" name="marriage_dowry_other" value="{{ $marriageDowryOtherValue }}" placeholder="Contoh: Seperangkat alat salat" :required="!isAndon && dowryType === 'LAINNYA'" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="marriage_location_address" class="block text-sm font-medium text-gray-700">Alamat Detail Tempat Akad <span class="text-red-500">*</span></label>
+                            <textarea id="marriage_location_address" name="marriage_location_address" rows="2" placeholder="Contoh: Masjid Al-Ikhlas Desa Sukamaju" :required="!isAndon" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">{{ $marriageLocationAddressValue }}</textarea>
+                        </div>
+                        <div class="md:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                            <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-gray-700">Wilayah Administratif Tempat Akad Nikah</h3>
+                            @include('components.region-selector', ['prefix' => 'marriage', 'provinces' => $provinces, 'selectedProvince' => old('marriage_province_id', $registration?->marriage_province_id ?? ''), 'selectedRegency' => old('marriage_regency_id', $registration?->marriage_regency_id ?? ''), 'selectedDistrict' => old('marriage_district_id', $registration?->marriage_district_id ?? ''), 'selectedVillage' => old('marriage_village_id', $registration?->marriage_village_id ?? '')])
+                        </div>
                     </div>
-                    <div x-show="dowryType === 'LAINNYA'" x-cloak class="mt-3">
-                        <label for="marriage_dowry_other" class="block text-xs font-medium text-gray-600">Keterangan mahar</label>
-                        <input id="marriage_dowry_other" type="text" name="marriage_dowry_other" value="{{ $marriageDowryOtherValue }}" placeholder="Contoh: Seperangkat alat salat" :required="dowryType === 'LAINNYA'" class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm">
-                    </div>
                 </div>
-                <div class="md:col-span-2">
-                    <label for="marriage_location_address" class="block text-sm font-medium text-gray-700">Alamat Detail Tempat Akad <span class="text-red-500">*</span></label>
-                    <textarea id="marriage_location_address" name="marriage_location_address" rows="2" placeholder="Contoh: Masjid Al-Ikhlas Desa Sukamaju" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">{{ $marriageLocationAddressValue }}</textarea>
-                </div>
-                <div class="md:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
-                    <h3 class="mb-3 text-xs font-bold uppercase tracking-wider text-gray-700">Wilayah Administratif Tempat Akad Nikah</h3>
-                    @include('components.region-selector', ['prefix' => 'marriage', 'provinces' => $provinces, 'selectedProvince' => old('marriage_province_id', $registration?->marriage_province_id ?? ''), 'selectedRegency' => old('marriage_regency_id', $registration?->marriage_regency_id ?? ''), 'selectedDistrict' => old('marriage_district_id', $registration?->marriage_district_id ?? ''), 'selectedVillage' => old('marriage_village_id', $registration?->marriage_village_id ?? '')])
-                </div>
-            </div>
+            </template>
         </section>
 
-        {{-- STEP 2 — CATIN PRIA --}}
+        {{-- STEP 2 --}}
         <section x-show="step === 2" x-cloak x-transition.opacity>
-            @include('registrations.components.catin-pria')
+            <template x-if="isAndon">
+                <div>@include('registrations.components.parents-pria')</div>
+            </template>
+            <template x-if="!isAndon">
+                <div>@include('registrations.components.catin-pria')</div>
+            </template>
         </section>
 
-        {{-- STEP 3 — ORANG TUA PRIA --}}
+        {{-- STEP 3 --}}
         <section x-show="step === 3" x-cloak x-transition.opacity>
-            @include('registrations.components.parents-pria')
+            <template x-if="isAndon">
+                <div>@include('registrations.components.catin-wanita')</div>
+            </template>
+            <template x-if="!isAndon">
+                <div>@include('registrations.components.parents-pria')</div>
+            </template>
         </section>
 
-        {{-- STEP 4 — CATIN WANITA --}}
+        {{-- STEP 4 --}}
         <section x-show="step === 4" x-cloak x-transition.opacity>
-            @include('registrations.components.catin-wanita')
+            <template x-if="isAndon">
+                <div>@include('registrations.components.parents-wanita')</div>
+            </template>
+            <template x-if="!isAndon">
+                <div>@include('registrations.components.catin-wanita')</div>
+            </template>
         </section>
 
-        {{-- STEP 5 — ORANG TUA WANITA --}}
+        {{-- STEP 5 --}}
         <section x-show="step === 5" x-cloak x-transition.opacity>
-            @include('registrations.components.parents-wanita')
+            <template x-if="isAndon">
+                <div>@include('registrations.components.documents')</div>
+            </template>
+            <template x-if="!isAndon">
+                <div>@include('registrations.components.parents-wanita')</div>
+            </template>
         </section>
 
-        {{-- STEP 6 — WALI & SAKSI --}}
+        {{-- STEP 6 — WALI & SAKSI (hanya Bedol/Kantor) --}}
+        <template x-if="!isAndon">
         <section x-show="step === 6" x-cloak x-transition.opacity>
             <div class="space-y-8">
                 @include('registrations.components.guardian')
                 @include('registrations.components.witnesses')
             </div>
         </section>
+        </template>
 
-        {{-- STEP 7 — DOKUMEN --}}
+        {{-- STEP 7 — DOKUMEN (hanya Bedol/Kantor) --}}
+        <template x-if="!isAndon">
         <section x-show="step === 7" x-cloak x-transition.opacity>
             @include('registrations.components.documents')
         </section>
+        </template>
 
         {{-- NAVIGASI WIZARD + OPSI A: SIMPAN FLEKSIBEL --}}
         <div x-show="isEditMode" x-cloak class="sticky bottom-0 z-10 -mx-5 -mb-5 mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-emerald-200 bg-emerald-50/95 px-5 py-4 backdrop-blur sm:-mx-6 lg:-mx-8">
@@ -545,7 +627,32 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => { if (window.initNikLookup) window.initNikLookup(); });
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[maxlength="16"][inputmode="numeric"]').forEach(el => {
+        el.addEventListener('input', () => {
+            const pos = el.selectionStart;
+            const before = el.value;
+            let v = el.value.replace(/\D/g, '');
+            if (v.length > 16) v = v.slice(0, 16);
+            if (v !== before) {
+                el.value = v;
+                try { el.setSelectionRange(pos, pos); } catch(e) {}
+            }
+        });
+        el.addEventListener('paste', e => {
+            const t = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+            if (/[^\d]/.test(t) || t.length > 16) {
+                e.preventDefault();
+                let v = t.replace(/\D/g, '').slice(0, 16);
+                const s = el.selectionStart || 0, ee = el.selectionEnd || 0;
+                el.value = el.value.slice(0, s) + v + el.value.slice(ee);
+                el.dispatchEvent(new Event('input', {bubbles:true}));
+                try { el.setSelectionRange(s + v.length, s + v.length); } catch(e2) {}
+            }
+        });
+    });
+    if (window.initNikLookup) window.initNikLookup();
+});
 </script>
 <script>
 (function(){ const oldInline = window.NikahDraftInline; window.__NIKAH_DRAFT_INLINE_DISABLED__ = true; window.NikahDraftInline = {

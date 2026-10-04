@@ -119,6 +119,9 @@ class RegistrationDocumentController extends Controller
      */
     public function printRegistrationData(Registration $registration): View
     {
+        if (($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH') {
+            abort(404, 'Dokumen F1 tidak tersedia untuk Pembuatan Andon Nikah.');
+        }
         $this->loadPrintData($registration);
 
         return view(
@@ -151,6 +154,9 @@ class RegistrationDocumentController extends Controller
      */
     public function printN2(Registration $registration): View
     {
+        if (($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH') {
+            abort(404, 'Dokumen N2 tidak tersedia untuk Pembuatan Andon Nikah.');
+        }
         $this->loadPrintData($registration);
 
         return view(
@@ -188,7 +194,7 @@ class RegistrationDocumentController extends Controller
         $requirements = $this->requirementService
             ->evaluate($registration);
 
-        if (!($requirements['n5']['required'] ?? false)) {
+        if (($registration->registration_path ?? '') !== 'PEMBUATAN_ANDON_NIKAH' && !($requirements['n5']['required'] ?? false)) {
             abort(
                 404,
                 'Dokumen N5 tidak diperlukan untuk pendaftaran ini.'
@@ -209,6 +215,9 @@ class RegistrationDocumentController extends Controller
      */
     public function printSuratPernyataanWali(Registration $registration): View
     {
+        if (($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH') {
+            abort(404, 'Surat Pernyataan Wali tidak tersedia untuk Pembuatan Andon Nikah.');
+        }
         $this->loadPrintData($registration);
         $data = $this->printViewData($registration);
         if (!$data['guardian']) abort(404, 'Data wali belum diisi.');
@@ -249,6 +258,9 @@ class RegistrationDocumentController extends Controller
      */
     public function printN6(Registration $registration): View|RedirectResponse
     {
+        if (($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH') {
+            abort(404, 'Dokumen N6 tidak tersedia untuk Pembuatan Andon Nikah.');
+        }
         $this->loadPrintData($registration);
 
         /*

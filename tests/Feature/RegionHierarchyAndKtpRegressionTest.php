@@ -30,7 +30,7 @@ class RegionHierarchyAndKtpRegressionTest extends TestCase
     private function basePayload($reg): array
     {
         return [
-            'registration_path' => 'DALAM_DESA', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas 10 gram', 'marriage_location_address' => 'Masjid',
+            'registration_path' => 'NIKAH_BEDOL', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas 10 gram', 'marriage_location_address' => 'Masjid',
             'pria_nik' => '3201010101010091', 'pria_name' => 'Pria', 'pria_birth_place' => 'Semarang', 'pria_birth_date' => '1995-01-01', 'pria_marital_status' => 'BELUM_KAWIN', 'pria_address' => 'Jl Pria', 'pria_province_id' => $reg['p']->id, 'pria_regency_id' => $reg['r']->id, 'pria_district_id' => $reg['d']->id, 'pria_village_id' => $reg['v']->id,
             'wanita_nik' => '3201010101010092', 'wanita_name' => 'Wanita', 'wanita_birth_place' => 'Semarang', 'wanita_birth_date' => '1997-01-01', 'wanita_marital_status' => 'BELUM_KAWIN', 'wanita_address' => 'Jl Wanita', 'wanita_province_id' => $reg['p']->id, 'wanita_regency_id' => $reg['r']->id, 'wanita_district_id' => $reg['d']->id, 'wanita_village_id' => $reg['v']->id,
             'pria_father_status' => 'HIDUP', 'pria_father_name' => 'Ayah Pria', 'pria_mother_status' => 'HIDUP', 'pria_mother_name' => 'Ibu Pria',
@@ -90,7 +90,7 @@ class RegionHierarchyAndKtpRegressionTest extends TestCase
     public function test_ktp_webp_and_overwrite_old_ext_is_cleaned(): void
     {
         Storage::fake('local');
-        $registration = Registration::create(['registration_number' => 'REG-KTP-1', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $registration = Registration::create(['registration_number' => 'REG-KTP-1', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $fileJpg = UploadedFile::fake()->image('ktp.jpg', 100, 100);
         $this->put(route('registrations.ktp.update', $registration), ['ktp' => ['pria' => $fileJpg]])->assertRedirect();
         Storage::disk('local')->assertExists('ktp/'.$registration->id.'/pria.jpg');
@@ -102,7 +102,7 @@ class RegionHierarchyAndKtpRegressionTest extends TestCase
 
     public function test_created_by_nullable_no_login(): void
     {
-        $reg = Registration::create(['registration_number' => 'REG-NOLOGIN-1', 'registration_path' => 'DALAM_DESA', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
+        $reg = Registration::create(['registration_number' => 'REG-NOLOGIN-1', 'registration_path' => 'NIKAH_BEDOL', 'status' => 'DRAFT', 'marriage_date' => '2026-12-20', 'marriage_time' => '09:00', 'marriage_dowry' => 'Emas', 'marriage_location_address' => 'Test']);
         $res = $this->post(route('n6.store'), [
             'registration_id' => $reg->id, 'deceased_name' => 'Alm', 'deceased_bin_binti' => 'Bin X', 'deceased_nik' => '3201010101010099', 'deceased_birth_place' => 'Semarang', 'deceased_birth_date' => '1960-01-01', 'deceased_address' => 'Jl', 'death_date' => '2025-01-01', 'document_number' => 'N6-NOLOGIN-1', 'issue_date' => '2025-01-02', 'signed_by' => 'Lurah', 'signed_by_position' => 'Kepala Desa',
         ]);

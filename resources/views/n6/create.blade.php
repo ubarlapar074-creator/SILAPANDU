@@ -159,8 +159,9 @@
                     <label for="registration_path" class="block text-sm font-medium text-gray-700">Jalur Pendaftaran <span class="text-red-500">*</span></label>
                     <select id="registration_path" name="registration_path" required class="mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                         <option value="">Pilih Jalur Pendaftaran</option>
-                        <option value="DALAM_DESA" @selected(old('registration_path') === 'DALAM_DESA')>Dalam Desa</option>
-                        <option value="ANDON" @selected(old('registration_path') === 'ANDON')>Andon Nikah</option>
+                        <option value="NIKAH_BEDOL" @selected(old('registration_path') === 'NIKAH_BEDOL')>Nikah Bedol</option>
+                        <option value="NIKAH_KANTOR" @selected(old('registration_path') === 'NIKAH_KANTOR')>Nikah Kantor</option>
+                        <option value="PEMBUATAN_ANDON_NIKAH" @selected(old('registration_path') === 'PEMBUATAN_ANDON_NIKAH')>Pembuatan Andon Nikah</option>
                     </select>
                     @error('registration_path') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>

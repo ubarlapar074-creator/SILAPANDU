@@ -17,6 +17,12 @@ class UpsertRegistrationAction
 {
     public static function validateGuardian(array $validated): void
     {
+        if (($validated['registration_path'] ?? null) === 'PEMBUATAN_ANDON_NIKAH') {
+            if (isset($validated['pria_nik'], $validated['wanita_nik']) && $validated['pria_nik'] === $validated['wanita_nik']) {
+                throw ValidationException::withMessages(['wanita_nik' => 'NIK Catin Pria dan Wanita tidak boleh sama.']);
+            }
+            return;
+        }
         if (($validated['guardian_relationship'] ?? null) === 'AYAH_KANDUNG') {
             if (($validated['wanita_father_status'] ?? null) !== 'HIDUP') {
                 throw ValidationException::withMessages(['guardian_relationship' => 'Ayah kandung yang berstatus meninggal tidak dapat dipilih sebagai wali.']);
@@ -51,8 +57,11 @@ class UpsertRegistrationAction
         ]);
         $fatherWanita = self::upsertParents($catinPria, 'pria', $validated);
         $fatherWanita = self::upsertParents($catinWanita, 'wanita', $validated, true);
-        self::createGuardian($registration, $validated, $fatherWanita);
-        self::createWitnesses($registration, $validated['witnesses'] ?? []);
+        $isAndon = ($validated['registration_path'] ?? null) === 'PEMBUATAN_ANDON_NIKAH';
+        if (!$isAndon) {
+            self::createGuardian($registration, $validated, $fatherWanita);
+            self::createWitnesses($registration, $validated['witnesses'] ?? []);
+        }
         self::upsertDocumentChecklist($catinPria, $validated['catin_pria_checklist'] ?? []);
         self::upsertDocumentChecklist($catinWanita, $validated['catin_wanita_checklist'] ?? []);
         RegistrationDocumentChecklist::create(['registration_id' => $registration->id, 'doc_n1_n4' => (bool)($validated['registration_checklist']['doc_n1_n4'] ?? false), 'doc_n6' => (bool)($validated['registration_checklist']['doc_n6'] ?? false)]);
@@ -104,6 +113,7 @@ class UpsertRegistrationAction
 
     private static function createGuardian(Registration $registration, array $validated, ?CatinParent $fatherWanita): void
     {
+        if (($validated['registration_path'] ?? null) === 'PEMBUATAN_ANDON_NIKAH') return;
         $guardian = new Guardian(['registration_id' => $registration->id]);
         $sebab = trim((string) ($validated['guardian_sebab_wali'] ?? ''));
         if ($sebab === '') $sebab = \App\Support\WaliHelper::defaultSebab($validated['guardian_relationship'], $fatherWanita?->status ?? null);
@@ -119,9 +129,14 @@ class UpsertRegistrationAction
 
     private static function createWitnesses(Registration $registration, array $witnesses): void
     {
-        foreach ($witnesses as $w) {
-            if (empty(array_filter($w, fn($v) => $v !== null && $v !== ''))) continue;
-            if (trim((string)($w['name'] ?? '')) === '') continue;
+        foreach ($witnesses as $idx => $w) {
+            if (!is_array($w)) continue;
+            $hasAny = !empty(array_filter($w, fn($v) => $v !== null && $v !== ''));
+            if (!$hasAny) continue;
+            $name = trim((string) ($w['name'] ?? ''));
+            if ($name === '') {
+                throw ValidationException::withMessages(["witnesses.$idx.name" => "Nama saksi ke-".($idx+1)." wajib diisi jika data saksi diisi."]);
+            }
             $wit = new Witness(array_merge(['registration_id' => $registration->id], array_intersect_key($w, array_flip(['name','gender','bin_binti','nik','birth_place','birth_date','nationality','religion','marital_status','education','occupation','phone','email','address','province_id','regency_id','district_id','village_id']))));
             $wit->save();
         }

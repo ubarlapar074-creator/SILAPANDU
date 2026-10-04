@@ -66,7 +66,7 @@ class DummyRegistrationSeeder extends Seeder
 
         $registration = Registration::create([
             'registration_number' => $number,
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-12-20',
             'marriage_time' => '09:00',

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Formulir Pengantar Nikah - Model N1</title>
+    <title>{{ ($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH' ? 'Surat Keterangan Andon Nikah - Model N1' : 'Formulir Pengantar Nikah - Model N1' }}</title>
     <style>
         @page { size: A4; margin: 16mm 19mm 18mm; }
         body { color: #111; font-family: "Times New Roman", serif; font-size: 12pt; line-height: 1.25; margin: 0; }
@@ -25,12 +25,13 @@
     </style>
 </head>
 <body>
+    @php $isAndonN1 = ($registration->registration_path ?? '') === 'PEMBUATAN_ANDON_NIKAH'; @endphp
     <div class="header">
         <p class="lampiran">LAMPIRAN V</p>
         <p class="lampiran">KEPUTUSAN DIREKTUR JENDERAL BIMBINGAN MASYARAKAT ISLAM</p>
         <p class="lampiran">NOMOR 473 TAHUN 2020</p>
         <p class="lampiran">TENTANG PETUNJUK TEKNIS PELAKSANAAN PENCATATAN PERNIKAHAN</p>
-        <h1>FORMULIR PENGANTAR NIKAH</h1>
+        <h1>{{ $isAndonN1 ? 'SURAT KETERANGAN ANDON NIKAH' : 'FORMULIR PENGANTAR NIKAH' }}</h1>
         <h2>Model N1</h2>
     </div>
 

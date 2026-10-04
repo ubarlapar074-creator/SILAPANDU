@@ -44,44 +44,41 @@ class RegistrationController extends Controller
         MarriageRequirementService $requirementService
     ) {
         AddressHelper::sanitizeNikInputs($request);
+        if (($request->input('registration_path') ?? '') === 'PEMBUATAN_ANDON_NIKAH') {
+            $request->merge([
+                'marriage_date' => null, 'marriage_time' => null, 'marriage_location_address' => null,
+                'marriage_dowry' => 'Andon', 'marriage_dowry_type' => 'LAINNYA', 'marriage_dowry_other' => 'Andon',
+            ]);
+        }
 
-        $validated = $request->validate(RegistrationRules::store(false)); UpsertRegistrationAction::validateGuardian($validated); 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI WALI
-        |--------------------------------------------------------------------------
-        */
+        $validated = $request->validate(RegistrationRules::store(false));
+        $isAndon = ($validated['registration_path'] ?? null) === 'PEMBUATAN_ANDON_NIKAH';
+        if (!$isAndon) {
+            UpsertRegistrationAction::validateGuardian($validated);
 
-        if ($validated['guardian_relationship'] === 'AYAH_KANDUNG') {
-
-            if ($validated['wanita_father_status'] !== 'HIDUP') {
-                throw ValidationException::withMessages([
-                    'guardian_relationship' =>
-                        'Ayah kandung yang berstatus meninggal tidak dapat dipilih sebagai wali.',
-                ]);
-            }
-
-        } elseif ($validated['guardian_relationship'] === 'WALI_HAKIM') {
-
-            // Wali Hakim TIDAK perlu mengisi data identitas
-            // Data akan diisi oleh KUA setempat
-
-        } else {
-
-            foreach ([
-                'guardian_name' => 'Nama lengkap wali',
-                'guardian_nik' => 'NIK wali (16 digit)',
-                'guardian_bin_binti' => 'Bin/Binti wali',
-                'guardian_birth_place' => 'Tempat lahir wali',
-                'guardian_birth_date' => 'Tanggal lahir wali',
-                'guardian_marital_status' => 'Status perkawinan wali',
-                'guardian_address' => 'Alamat wali',
-            ] as $field => $label) {
-
-                if (empty($validated[$field])) {
+            if ($validated['guardian_relationship'] === 'AYAH_KANDUNG') {
+                if ($validated['wanita_father_status'] !== 'HIDUP') {
                     throw ValidationException::withMessages([
-                        $field => $label . ' wajib diisi untuk wali keluarga (non Hakim).',
+                        'guardian_relationship' =>
+                            'Ayah kandung yang berstatus meninggal tidak dapat dipilih sebagai wali.',
                     ]);
+                }
+            } elseif ($validated['guardian_relationship'] === 'WALI_HAKIM') {
+            } else {
+                foreach ([
+                    'guardian_name' => 'Nama lengkap wali',
+                    'guardian_nik' => 'NIK wali (16 digit)',
+                    'guardian_bin_binti' => 'Bin/Binti wali',
+                    'guardian_birth_place' => 'Tempat lahir wali',
+                    'guardian_birth_date' => 'Tanggal lahir wali',
+                    'guardian_marital_status' => 'Status perkawinan wali',
+                    'guardian_address' => 'Alamat wali',
+                ] as $field => $label) {
+                    if (empty($validated[$field])) {
+                        throw ValidationException::withMessages([
+                            $field => $label . ' wajib diisi untuk wali keluarga (non Hakim).',
+                        ]);
+                    }
                 }
             }
         }
@@ -107,11 +104,20 @@ class RegistrationController extends Controller
                     $registration->registration_number = $this->generateRegistrationNumber();
                     $registration->registration_path = $validated['registration_path'];
                     $registration->status = 'DRAFT';
-                    $registration->marriage_date = $validated['marriage_date'];
-                    $registration->marriage_time = $validated['marriage_time'];
-                    $registration->marriage_dowry = $validated['marriage_dowry'] ?? null;
-                    $this->assignDowry($registration, $validated);
-                    $registration->marriage_location_address = $validated['marriage_location_address'];
+                    $isAndonTx = ($validated['registration_path'] ?? null) === 'PEMBUATAN_ANDON_NIKAH';
+                    $registration->marriage_date = $isAndonTx ? null : ($validated['marriage_date'] ?? null);
+                    $registration->marriage_time = $isAndonTx ? null : ($validated['marriage_time'] ?? null);
+                    if ($isAndonTx) {
+                        $registration->marriage_dowry = null;
+                        $registration->marriage_dowry_type = null;
+                        $registration->marriage_dowry_money = null;
+                        $registration->marriage_dowry_gold = null;
+                        $registration->marriage_dowry_other = null;
+                    } else {
+                        $registration->marriage_dowry = $validated['marriage_dowry'] ?? null;
+                        $this->assignDowry($registration, $validated);
+                    }
+                    $registration->marriage_location_address = $isAndonTx ? null : ($validated['marriage_location_address'] ?? null);
                     $registration->save();
 
             $catinPria = $this->resolveCatinForRegistration($registration, 'PRIA', [
@@ -157,12 +163,9 @@ class RegistrationController extends Controller
             $this->upsertParents($catinPria, 'pria', $validated);
             $fatherWanita = $this->upsertParents($catinWanita, 'wanita', $validated, true);
 
-            /*
-            |--------------------------------------------------------------------------
-            | 6. GUARDIAN
-            |--------------------------------------------------------------------------
-            */
-
+            if ($isAndonTx) {
+                $guardian = null;
+            } else {
             $guardian = new Guardian();
 
             $guardian->registration_id =
@@ -271,16 +274,20 @@ class RegistrationController extends Controller
             }
 
             $guardian->save();
+            }
 
             /*
             |--------------------------------------------------------------------------
-            | 7. WITNESSES
+            | 7. WITNESSES (skip untuk Andon)
             |--------------------------------------------------------------------------
             */
 
-            foreach (($validated['witnesses'] ?? []) as $witnessData) {
+            if (!$isAndonTx) {
+            foreach (($validated['witnesses'] ?? []) as $wIdx => $witnessData) {
                 if (empty(array_filter($witnessData, fn($v) => $v !== null && $v !== ''))) continue;
-                if (trim((string) ($witnessData['name'] ?? '')) === '') continue;
+                if (trim((string) ($witnessData['name'] ?? '')) === '') {
+                    throw ValidationException::withMessages(["witnesses.$wIdx.name" => "Nama saksi ke-".($wIdx+1)." wajib diisi jika data saksi diisi."]);
+                }
 
                 $witness = new Witness();
 
@@ -342,6 +349,7 @@ class RegistrationController extends Controller
                     $witnessData['village_id'] ?? null;
 
                 $witness->save();
+            }
             }
 
             /*
@@ -760,7 +768,7 @@ class RegistrationController extends Controller
         AddressHelper::sanitizeNikInputs($request);
 
         $rules = [
-            'registration_path' => ['sometimes', 'nullable', 'in:DALAM_DESA,ANDON'],
+            'registration_path' => ['sometimes', 'nullable', 'in:NIKAH_BEDOL,NIKAH_KANTOR,PEMBUATAN_ANDON_NIKAH'],
             'marriage_date' => ['sometimes', 'nullable', 'date'],
             'marriage_time' => ['sometimes', 'nullable', 'date_format:H:i'],
             'marriage_dowry' => ['sometimes', 'nullable', 'string', 'max:255'],

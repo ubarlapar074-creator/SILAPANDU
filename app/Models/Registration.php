@@ -9,7 +9,28 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Registration extends Model
 {
+    public const PATH_NIKAH_BEDOL = 'NIKAH_BEDOL';
+    public const PATH_NIKAH_KANTOR = 'NIKAH_KANTOR';
+    public const PATH_PEMBUATAN_ANDON_NIKAH = 'PEMBUATAN_ANDON_NIKAH';
+
     protected $fillable = ['registration_number', 'registration_path', 'status', 'marriage_date', 'marriage_time', 'marriage_dowry', 'marriage_dowry_type', 'marriage_dowry_money', 'marriage_dowry_gold', 'marriage_dowry_other', 'marriage_location_address'];
+
+    public function isAndon(): bool
+    {
+        return $this->registration_path === self::PATH_PEMBUATAN_ANDON_NIKAH;
+    }
+
+    public static function pathLabel(?string $path): string
+    {
+        return match ($path) {
+            self::PATH_NIKAH_BEDOL => 'NIKAH BEDOL',
+            self::PATH_NIKAH_KANTOR => 'NIKAH KANTOR',
+            self::PATH_PEMBUATAN_ANDON_NIKAH => 'PEMBUATAN ANDON NIKAH',
+            'DALAM_DESA' => 'NIKAH BEDOL',
+            'ANDON' => 'PEMBUATAN ANDON NIKAH',
+            default => $path ?? '-',
+        };
+    }
 
     protected $casts = [
         'marriage_date' => 'date',

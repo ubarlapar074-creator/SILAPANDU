@@ -45,6 +45,9 @@ return [
     'confirmed' => 'Konfirmasi :attribute tidak cocok.',
     'attributes' => [
         'registration_path' => 'jalur pendaftaran',
+        'NIKAH_BEDOL' => 'Nikah Bedol',
+        'NIKAH_KANTOR' => 'Nikah Kantor',
+        'PEMBUATAN_ANDON_NIKAH' => 'Pembuatan Andon Nikah',
         'marriage_date' => 'tanggal akad',
         'marriage_time' => 'waktu akad',
         'marriage_dowry' => 'mahar',

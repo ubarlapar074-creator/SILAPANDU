@@ -49,7 +49,7 @@ class RegistrationEditPrefillTest extends TestCase
 
         $registration = Registration::create([
             'registration_number' => 'REG-20260920-ABCDE1',
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-10-15',
             'marriage_time' => '09:00',
@@ -164,7 +164,7 @@ class RegistrationEditPrefillTest extends TestCase
     {
         $registration = Registration::create([
             'registration_number' => 'REG-20260920-ABCDE2',
-            'registration_path' => 'DALAM_DESA',
+            'registration_path' => 'NIKAH_BEDOL',
             'status' => 'DRAFT',
             'marriage_date' => '2026-10-15',
             'marriage_time' => '09:00',
@@ -175,7 +175,7 @@ class RegistrationEditPrefillTest extends TestCase
         $response = $this->get(route('registrations.edit', $registration));
 
         $response->assertOk();
-        $response->assertSee('value="DALAM_DESA"', false);
+        $response->assertSee('value="NIKAH_BEDOL"', false);
         $response->assertSee('value="2026-10-15"', false);
         $response->assertSee('value="09:00"', false);
         $response->assertSee('value="Emas 2 gram"', false);

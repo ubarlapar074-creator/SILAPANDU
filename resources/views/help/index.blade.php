@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 <ol class="mt-4 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                    <li><span class="font-semibold">Data Pernikahan:</span> jalur (Dalam Desa/Andon), tanggal & jam akad, mas kawin, dan <span class="font-medium">alamat tempat akad</span> — alamat ini yang tercetak di N2.</li>
+                    <li><span class="font-semibold">Data Pernikahan (Bedol/Kantor):</span> jalur (Nikah Bedol / Nikah Kantor), tanggal & jam akad, mas kawin, dan <span class="font-medium">alamat tempat akad</span> — alamat ini yang tercetak di N2. Untuk <span class="font-medium">Pembuatan Andon Nikah</span> blok ini otomatis disembunyikan (5 step: tanpa tanggal/jam/mahar/lokasi/wilayah akad) → langsung Catin Pria.</li>
                     <li><span class="font-semibold">Catin Pria & Wanita:</span> NIK 16 digit (cek duplikasi), nama, Bin/Binti, tempat & tanggal lahir, <span class="font-medium">status: Belum Kawin / Cerai Hidup / Cerai Mati</span> (cetak jadi <em>JANDA (CERAI HIDUP)</em> dst. sesuai gender), pekerjaan, pendidikan, alamat lengkap + wilayah (provinsi → desa).</li>
                     <li><span class="font-semibold">Orang tua (Ayah/Ibu kedua catin):</span> status Hidup/Meninggal — jika meninggal, nama tercetak <em>… (Alm)/(Almh)</em> dan field lain dikosongkan.</li>
                     <li><span class="font-semibold">Wali nikah:</span> Ayah kandung / wali hakim / lainnya — jika wali hakim, isian wali dikosongkan otomatis.</li>
@@ -104,8 +104,9 @@
                 <div class="mt-4 grid gap-2 text-sm sm:grid-cols-2">
                     <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">Data Pendaftaran (F1)</span><span class="text-slate-500"> — ringkasan lengkap catin & ortu untuk arsip</span></div>
                     <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N1 Pengantar Nikah</span><span class="text-slate-500"> — TTD Kepala Desa (sesuai profil desa)</span></div>
-                    <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N2 Kehendak Nikah</span><span class="text-slate-500"> — TTD kiri Kepala KUA + NIP, kanan Pemohon</span></div>
-                    <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N4 / N5 / N6</span><span class="text-slate-500"> — N5 & N6 muncul kondisional bila diperlukan</span></div>
+                    <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N2 Kehendak Nikah</span><span class="text-slate-500"> — TTD kiri Kepala KUA + NIP, kanan Pemohon (tidak ada di Andon)</span></div>
+                    <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N4 Persetujuan</span><span class="text-slate-500"> — selalu ada</span></div>
+                    <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">N5</span><span class="text-slate-500"> — Bedol/Kantor kondisional &lt;21th, Andon selalu tersedia header IZIN ORTU</span></div>
                     <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">Surat Pernyataan Status</span><span class="text-slate-500"> — Pria & Wanita terpisah</span></div>
                     <div class="rounded-lg border border-slate-200 px-3 py-2.5"><span class="font-semibold">Fotokopi KTP</span><span class="text-slate-500"> — kelola & cetak lampiran</span></div>
                 </div>

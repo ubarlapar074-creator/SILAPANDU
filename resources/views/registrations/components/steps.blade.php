@@ -18,6 +18,32 @@
             }
             return 7;
         },
+        get isAndon() {
+            const data = this.wizardData;
+            if (data && typeof data.isAndon !== 'undefined') return !!data.isAndon;
+            return false;
+        },
+        get stepLabel() {
+            const s = this.step;
+            if (this.isAndon) {
+                return {
+                    1: 'Catin Pria',
+                    2: 'Orang Tua Pria',
+                    3: 'Catin Wanita',
+                    4: 'Orang Tua Wanita',
+                    5: 'Dokumen Pendaftaran'
+                }[s] || '';
+            }
+            return {
+                1: 'Informasi Pendaftaran',
+                2: 'Data Catin Pria',
+                3: 'Data Orang Tua Pria',
+                4: 'Data Catin Wanita',
+                5: 'Data Orang Tua Wanita',
+                6: 'Data Wali & Saksi',
+                7: 'Dokumen Pendaftaran'
+            }[s] || '';
+        },
         goToStep(step) {
             const data = this.wizardData;
             if (data?.goToStep) {
@@ -45,15 +71,7 @@
         </div>
 
         <div class="text-xs text-gray-500">
-            <span x-text="{
-                1: 'Informasi Pendaftaran',
-                2: 'Data Catin Pria',
-                3: 'Data Orang Tua Pria',
-                4: 'Data Catin Wanita',
-                5: 'Data Orang Tua Wanita',
-                6: 'Data Wali & Saksi',
-                7: 'Dokumen Pendaftaran'
-            }[step]"></span>
+            <span x-text="stepLabel"></span>
         </div>
 
     </div>
@@ -78,12 +96,12 @@
         <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Mode Edit — klik tab langsung tanpa urutan</p>
         <p class="mt-1 text-[11px] text-gray-500">Ubah hanya tab yang diperlukan, lalu gunakan tombol Simpan & Kembali ke Dashboard di bawah.</p>
      </div>
-     {{-- =========================================================
-         DESKTOP STEP NAVIGATION
-    ========================================================== --}}
-    <div class="mt-5 hidden md:grid md:grid-cols-7 md:gap-2">
+      {{-- =========================================================
+         DESKTOP STEP NAVIGATION (Bedol/Kantor:7, Andon:5)
+     ========================================================== --}}
+     <div class="mt-5 hidden md:grid" :class="isAndon ? 'md:grid-cols-5 md:gap-2' : 'md:grid-cols-7 md:gap-2'">
 
-        {{-- STEP 1 --}}
+        {{-- STEP 1: Pendaftaran (Bedol/Kantor) / Catin Pria (Andon) --}}
         <button
             type="button"
             @click="goToStep(1)"
@@ -108,14 +126,12 @@
                     <span x-show="step > 1">✓</span>
                 </span>
 
-                <span class="hidden lg:block text-xs font-semibold leading-tight">
-                    Pendaftaran
-                </span>
+                <span class="hidden lg:block text-xs font-semibold leading-tight" x-text="isAndon ? 'Catin Pria' : 'Pendaftaran'"></span>
 
             </div>
         </button>
 
-        {{-- STEP 2 --}}
+        {{-- STEP 2: Catin Pria (Bedol/Kantor) / Ortu Pria (Andon) --}}
         <button
             type="button"
             @click="goToStep(2)"
@@ -140,14 +156,12 @@
                     <span x-show="step > 2">✓</span>
                 </span>
 
-                <span class="hidden lg:block text-xs font-semibold leading-tight">
-                    Catin Pria
-                </span>
+                <span class="hidden lg:block text-xs font-semibold leading-tight" x-text="isAndon ? 'O. Tua Pria' : 'Catin Pria'"></span>
 
             </div>
         </button>
 
-        {{-- STEP 3 --}}
+        {{-- STEP 3: O.Tua Pria / Catin Wanita --}}
         <button
             type="button"
             @click="goToStep(3)"
@@ -172,14 +186,12 @@
                     <span x-show="step > 3">✓</span>
                 </span>
 
-                <span class="hidden lg:block text-xs font-semibold leading-tight">
-                    O. Tua Pria
-                </span>
+                <span class="hidden lg:block text-xs font-semibold leading-tight" x-text="isAndon ? 'Catin Wanita' : 'O. Tua Pria'"></span>
 
             </div>
         </button>
 
-        {{-- STEP 4 --}}
+        {{-- STEP 4: Catin Wanita / O.Tua Wanita --}}
         <button
             type="button"
             @click="goToStep(4)"
@@ -204,14 +216,12 @@
                     <span x-show="step > 4">✓</span>
                 </span>
 
-                <span class="hidden lg:block text-xs font-semibold leading-tight">
-                    Catin Wanita
-                </span>
+                <span class="hidden lg:block text-xs font-semibold leading-tight" x-text="isAndon ? 'O. Tua Wanita' : 'Catin Wanita'"></span>
 
             </div>
         </button>
 
-        {{-- STEP 5 --}}
+        {{-- STEP 5: O.Tua Wanita / Dokumen --}}
         <button
             type="button"
             @click="goToStep(5)"
@@ -236,14 +246,13 @@
                     <span x-show="step > 5">✓</span>
                 </span>
 
-                <span class="hidden lg:block text-xs font-semibold leading-tight">
-                    O. Tua Wanita
-                </span>
+                <span class="hidden lg:block text-xs font-semibold leading-tight" x-text="isAndon ? 'Dokumen' : 'O. Tua Wanita'"></span>
 
             </div>
         </button>
 
-        {{-- STEP 6 --}}
+        {{-- STEP 6 (Bedol/Kantor only) --}}
+        <template x-if="!isAndon">
         <button
             type="button"
             @click="goToStep(6)"
@@ -274,30 +283,31 @@
 
             </div>
         </button>
+        </template>
 
-        {{-- STEP 7 --}}
+        {{-- STEP 7 / STEP 5 Andon --}}
         <button
             type="button"
-            @click="goToStep(7)"
+            @click="goToStep(isAndon ? 5 : 7)"
             class="group text-left"
         >
             <div
                 class="flex items-center gap-2"
-                :class="step >= 7 ? 'text-emerald-600' : 'text-gray-400'"
+                :class="step >= (isAndon ? 5 : 7) ? 'text-emerald-600' : 'text-gray-400'"
             >
 
                 <span
                     class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition"
                     :class="
-                        step === 7
+                        step === (isAndon ? 5 : 7)
                             ? 'border-emerald-600 bg-emerald-600 text-white'
-                            : step > 7
+                            : step > (isAndon ? 5 : 7)
                                 ? 'border-emerald-600 bg-emerald-50 text-emerald-600'
                                 : 'border-gray-300 bg-white text-gray-400'
                     "
                 >
-                    <span x-show="step <= 7">7</span>
-                    <span x-show="step > 7">✓</span>
+                    <span x-show="step <= (isAndon ? 5 : 7)" x-text="isAndon ? '5' : '7'"></span>
+                    <span x-show="step > (isAndon ? 5 : 7)">✓</span>
                 </span>
 
                 <span class="hidden lg:block text-xs font-semibold leading-tight">
@@ -322,15 +332,7 @@
 
             <span
                 class="text-xs font-bold text-emerald-600"
-                x-text="{
-                    1: 'Informasi Pendaftaran',
-                    2: 'Catin Pria',
-                    3: 'Orang Tua Pria',
-                    4: 'Catin Wanita',
-                    5: 'Orang Tua Wanita',
-                    6: 'Wali & Saksi',
-                    7: 'Dokumen'
-                }[step]"
+                x-text="stepLabel"
             ></span>
 
         </div>

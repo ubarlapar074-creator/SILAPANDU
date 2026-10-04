@@ -9,16 +9,18 @@ class RegistrationRules
         $req = fn(array $rules) => $autosave ? array_map(fn($r) => $r === 'required' ? 'nullable' : $r, $rules) : $rules;
         $reqSometimes = fn(array $rules) => $autosave ? array_merge(['sometimes','nullable'], array_filter($rules, fn($r) => $r !== 'required')) : $rules;
 
+        $pathIn = 'NIKAH_BEDOL,NIKAH_KANTOR,PEMBUATAN_ANDON_NIKAH';
+
         return [
-            'registration_path' => $autosave ? ['sometimes','nullable','in:DALAM_DESA,ANDON'] : ['required','in:DALAM_DESA,ANDON'],
-            'marriage_date' => $autosave ? ['sometimes','nullable','date'] : ['required','date'],
-            'marriage_time' => $autosave ? ['sometimes','nullable','date_format:H:i'] : ['required','date_format:H:i'],
+            'registration_path' => $autosave ? ['sometimes','nullable','in:'.$pathIn] : ['required','in:'.$pathIn],
+            'marriage_date' => $autosave ? ['sometimes','nullable','date'] : ['nullable','date','required_if:registration_path,NIKAH_BEDOL,NIKAH_KANTOR'],
+            'marriage_time' => $autosave ? ['sometimes','nullable','date_format:H:i'] : ['nullable','date_format:H:i','required_if:registration_path,NIKAH_BEDOL,NIKAH_KANTOR'],
             'marriage_dowry' => $autosave ? ['sometimes','nullable','string','max:255'] : ['nullable','string','max:255','required_without:marriage_dowry_type'],
             'marriage_dowry_type' => ['sometimes','nullable','in:UANG_EMAS,UANG,EMAS,LAINNYA'],
             'marriage_dowry_money' => $autosave ? ['sometimes','nullable','string','max:100'] : ['nullable','string','max:100','required_if:marriage_dowry_type,UANG_EMAS,UANG'],
             'marriage_dowry_gold' => $autosave ? ['sometimes','nullable','string','max:100'] : ['nullable','string','max:100','required_if:marriage_dowry_type,UANG_EMAS,EMAS'],
             'marriage_dowry_other' => $autosave ? ['sometimes','nullable','string','max:255'] : ['nullable','string','max:255','required_if:marriage_dowry_type,LAINNYA'],
-            'marriage_location_address' => $autosave ? ['sometimes','nullable','string','max:255'] : ['required','string','max:255'],
+            'marriage_location_address' => $autosave ? ['sometimes','nullable','string','max:255'] : ['nullable','string','max:255','required_if:registration_path,NIKAH_BEDOL,NIKAH_KANTOR'],
 
             'pria_nik' => $autosave ? ['sometimes','nullable','digits:16','different:wanita_nik'] : ['required','digits:16','different:wanita_nik'],
             'pria_name' => $autosave ? ['sometimes','nullable','string','max:255'] : ['required','string','max:255'],
@@ -136,7 +138,7 @@ class RegistrationRules
             'wanita_mother_district_id' => ['nullable','exists:districts,id'],
             'wanita_mother_village_id' => ['nullable','exists:villages,id'],
 
-            'guardian_relationship' => $autosave ? ['sometimes','nullable','in:AYAH_KANDUNG,KAKEK,SAUDARA_KANDUNG_LAKI,PAMAN,WALI_HAKIM'] : ['required','in:AYAH_KANDUNG,KAKEK,SAUDARA_KANDUNG_LAKI,PAMAN,WALI_HAKIM'],
+            'guardian_relationship' => $autosave ? ['sometimes','nullable','in:AYAH_KANDUNG,KAKEK,SAUDARA_KANDUNG_LAKI,PAMAN,WALI_HAKIM'] : ['nullable','in:AYAH_KANDUNG,KAKEK,SAUDARA_KANDUNG_LAKI,PAMAN,WALI_HAKIM','required_if:registration_path,NIKAH_BEDOL,NIKAH_KANTOR'],
             'guardian_sebab_wali' => ['nullable','string','max:500'],
             'guardian_marital_status' => ['nullable','string','max:50'],
             'guardian_name' => ['nullable','string','max:255'],
