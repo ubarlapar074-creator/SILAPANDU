@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILAPANDU - Sistem Layanan Pencatatan Pernikahan Terpadu</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+
+        /* Submenu transition styles */
+        .submenu-enter {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .submenu-open {
+            max-height: 300px;
+            opacity: 1;
+        }
+
+        .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 antialiased flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Mobile Header Navigation Toggle -->
+    <div class="md:hidden glass-header border-b border-slate-800 p-4 flex items-center justify-between z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-kaaba text-base"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-sm tracking-wide text-white">SILAPANDU</h1>
+                <p class="text-[9px] text-emerald-400 uppercase tracking-wider font-semibold">Layanan Pernikahan</p>
+            </div>
+        </div>
+        <button onclick="toggleMobileSidebar()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">
+            <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+    </div>
+
+    <!-- MAIN SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-72 bg-slate-900/95 border-r border-slate-800 flex flex-col justify-between z-40 transition-transform duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
+        
+        <div class="flex flex-col h-full overflow-y-auto">
+            <!-- Branding Header -->
+            <div class="p-5 border-b border-slate-800/80 space-y-4">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/20">
+                        <i class="fa-solid fa-kaaba"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-base tracking-tight text-white flex items-center gap-1.5">
+                            SILAPANDU
+                            <span class="px-1.5 py-0.5 text-[9px] bg-emerald-950 text-emerald-400 font-bold rounded border border-emerald-500/30">v2.4</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Sistem Layanan Pencatatan Pernikahan Terpadu</p>
+                    </div>
+                </div>
+
+                <!-- Village Logo & Badge Banner -->
+                <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center shrink-0">
+                        <!-- Village / Regional Symbol Placeholder -->
+                        <i class="fa-solid fa-building-columns text-emerald-400 text-lg"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Kantor Desa / KUA</p>
+                        <p class="text-xs font-bold text-slate-100 truncate">( Diambil dari database)</p>
+                        <p class="text-[10px] text-emerald-400 font-medium truncate">( diambil dari Database )</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu Links -->
+            <nav class="p-4 space-y-1.5 flex-1 text-xs font-medium">
+                
+                <!-- Dashboard Utama -->
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 font-bold transition-all">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-chart-pie text-sm w-4"></i>
+                        <span>Dashboard Utama</span>
+                    </span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                </button>
+
+                <!-- Pendaftaran Baru Accordion Menu -->
+                <div class="space-y-1">
+                    <button onclick="toggleSubmenu('submenu-pendaftaran', 'arrow-pendaftaran')" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-circle-plus text-sm w-4 text-emerald-400"></i>
+                            <span>Pendaftaran Baru</span>
+                        </span>
+                        <i id="arrow-pendaftaran" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"></i>
+                    </button>
+                    
+                    <div id="submenu-pendaftaran" class="submenu-enter pl-9 space-y-1">
+                        <button onclick="openRegistrationType('kantor')" class="w-full py-2 px-3 rounded-lg text-slate-400 hover:text-emerald-300 hover:bg-slate-800/40 text-left flex items-center justify-between transition-colors">
+                            <span>1. Nikah Kantor</span>
+                            <i class="fa-solid fa-building text-[10px] text-slate-500"></i>
+                        </button>
+                        <button onclick="openRegistrationType('bedol')" class="w-full py-2 px-3 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800/40 text-left flex items-center justify-between transition-colors">
+                            <span>2. Nikah Bedolan / Luar KUA</span>
+                            <i class="fa-solid fa-house-user text-[10px] text-slate-500"></i>
+                        </button>
+                        <button onclick="openRegistrationType('andon')" class="w-full py-2 px-3 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-800/40 text-left flex items-center justify-between transition-colors">
+                            <span>3. Pembuatan Andon Nikah</span>
+                            <i class="fa-solid fa-paper-plane text-[10px] text-slate-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Riwayat & Data Pendaftaran -->
+                <button onclick="switchTab('data-pendaftaran')" id="nav-data" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-folder-open text-sm w-4 text-slate-400"></i>
+                        <span>Riwayat & Data Nikah</span>
+                    </span>
+                    <span class="px-2 py-0.5 text-[9px] font-bold bg-slate-800 text-slate-300 rounded-full border border-slate-700">28</span>
+                </button>
+
+                <div class="pt-3 pb-1">
+                    <p class="px-3.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Konfigurasi</p>
+                </div>
+
+                <!-- Pengaturan Submenu Accordion -->
+                <div class="space-y-1">
+                    <button onclick="toggleSubmenu('submenu-pengaturan', 'arrow-pengaturan')" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-sliders text-sm w-4 text-slate-400"></i>
+                            <span>Pengaturan</span>
+                        </span>
+                        <i id="arrow-pengaturan" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"></i>
+                    </button>
+
+                    <div id="submenu-pengaturan" class="submenu-enter pl-9 space-y-1">
+                        <button onclick="openModal('modalSettings')" class="w-full py-2 px-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-left flex items-center justify-between transition-colors">
+                            <span>1. Penomoran Surat & TDT</span>
+                            <i class="fa-solid fa-signature text-[10px] text-slate-500"></i>
+                        </button>
+                        <button onclick="showToast('Membuka Pengaturan Profil Pengguna...')" class="w-full py-2 px-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-left flex items-center justify-between transition-colors">
+                            <span>2. Pengaturan Profile</span>
+                            <i class="fa-solid fa-user-gear text-[10px] text-slate-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panduan Aplikasi -->
+                <button onclick="openModal('modalGuide')" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-book-bookmark text-sm w-4 text-amber-400"></i>
+                        <span>Panduan Aplikasi</span>
+                    </span>
+                    <i class="fa-solid fa-circle-question text-slate-500 text-xs"></i>
+                </button>
+
+                <!-- Tentang Aplikasi -->
+                <button onclick="openModal('modalAbout')" class="w-full px-3.5 py-3 rounded-xl flex items-center justify-between text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-info text-sm w-4 text-slate-400"></i>
+                        <span>Tentang Aplikasi</span>
+                    </span>
+                </button>
+
+            </nav>
+
+            <!-- User Profile Badge & Logout -->
+            <div class="p-4 border-t border-slate-800/80 space-y-3">
+                <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Avatar Petugas" class="w-9 h-9 rounded-xl object-cover ring-2 ring-emerald-500/30">
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-white truncate">H. M. Ridwan, S.Ag</p>
+                            <p class="text-[10px] text-slate-400 truncate">Administrator Desa</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="openModal('modalLogout')" class="w-full py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Keluar (Logout)</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CANVAS -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Top App Header Bar -->
+        <header class="glass-header border-b border-slate-800 px-6 py-4 flex items-center justify-between gap-4 shrink-0">
+            <!-- Breadcrumb Navigation -->
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+                <i class="fa-solid fa-house text-emerald-400"></i>
+                <span>/</span>
+                <span id="breadcrumb-active" class="text-white font-semibold">Dashboard Utama</span>
+            </div>
+
+            <!-- Global Search & System Status Badge -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 w-64 focus-within:ring-2 focus-within:ring-emerald-500/50">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500 mr-2"></i>
+                    <input type="text" placeholder="Cari NIK / Nama Pemohon..." class="bg-transparent border-none focus:outline-none w-full placeholder-slate-500">
+                </div>
+
+                <div class="flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="hidden md:inline">Server Online</span>
+                </div>
+
+                <button onclick="showToast('Notifikasi: 3 Berkas baru siap divalidasi')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white relative">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Body Container -->
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            <!-- VIEW 1: DASHBOARD OVERVIEW TAB -->
+            <div id="view-dashboard" class="space-y-6">
+                
+                <!-- Hero Welcome Banner -->
+                <div class="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950 p-6 sm:p-8 border border-slate-800 shadow-2xl overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="relative z-10 space-y-2 max-w-2xl">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            SIMKAH & Sistem Desa Terintegrasi
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Selamat Datang di SILAPANDU</h2>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Pusat kendali layanan pencatatan pernikahan, penerbitan surat rekomendasi (Andon Nikah), serta pengelolaan formulir N1–N6 Desa.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Overview Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Total Pendaftaran Bulan Ini -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400 text-xs font-semibold">Total Pendaftaran (Okt)</span>
+                            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-2xl font-extrabold text-white">28</span>
+                            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-trend-up"></i> +12%
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Dibandingkan bulan September</p>
+                    </div>
+
+                    <!-- Nikah Kantor -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400 text-xs font-semibold">Nikah Kantor KUA</span>
+                            <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-2xl font-extrabold text-white">12</span>
+                            <span class="text-xs font-semibold text-slate-400">42% dari total</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Kelengkapan Dokumen</p>
+                    </div>
+
+                    <!-- Nikah Bedolan -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400 text-xs font-semibold">Nikah Bedolan (Luar)</span>
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+                                <i class="fa-solid fa-house-user"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-2xl font-extrabold text-white">10</span>
+                            <span class="text-xs font-semibold text-amber-400">PNBP Disetor</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Di Kediaman Pemohon / Gedung</p>
+                    </div>
+
+                    <!-- Andon Nikah / Numpang Nikah -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-400 text-xs font-semibold">Rekomendasi Andon</span>
+                            <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-2xl font-extrabold text-white">6</span>
+                            <span class="text-xs font-semibold text-cyan-400">TDT Terbit</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Surat Rekomendasi Luar Desa</p>
+                    </div>
+
+                </div>
+
+                <!-- Quick Action Cards (Entry Shortcuts) -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Akses Cepat Pendaftaran Baru</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        <div onclick="openRegistrationType('kantor')" class="group p-5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-building-circle-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-white text-sm">1. Nikah Kantor</h4>
+                                <p class="text-xs text-slate-400 mt-1">Akad dilaksanakan di Balai KUA pada jam kerja.</p>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                Buat Permohonan <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+
+                        <div onclick="openRegistrationType('bedol')" class="group p-5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition-all space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-house-chimney-window"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-white text-sm">2. Nikah Bedolan</h4>
+                                <p class="text-xs text-slate-400 mt-1">Akad diluar Balai KUA (Rumah, Masjid, Gedung).</p>
+                            </div>
+                            <span class="text-xs text-amber-400 font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                Buat Permohonan <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+
+                        <div onclick="openRegistrationType('andon')" class="group p-5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-stamp"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-white text-sm">3. Andon / Rekomendasi</h4>
+                                <p class="text-xs text-slate-400 mt-1">Surat Numpang Nikah untuk warga keluar wilayah.</p>
+                            </div>
+                            <span class="text-xs text-cyan-400 font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                Buat Surat <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Recent Registrations Table -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="font-extrabold text-white text-base">Pendaftaran Nikah Terbaru</h3>
+                            <p class="text-xs text-slate-400">Daftar permohonan masuk yang perlu diperiksa atau dicetak formulirnya.</p>
+                        </div>
+                        
+                        <!-- Table Filters -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="filterTable('all')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700">Semua</button>
+                            <button onclick="filterTable('kantor')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-xs font-semibold text-emerald-400 hover:bg-slate-700">Nikah Kantor</button>
+                            <button onclick="filterTable('bedol')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-xs font-semibold text-amber-400 hover:bg-slate-700">Bedolan</button>
+                            <button onclick="filterTable('andon')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-xs font-semibold text-cyan-400 hover:bg-slate-700">Andon</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950/80 text-slate-400 font-semibold border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3.5 rounded-l-xl">No. Registrasi</th>
+                                    <th class="p-3.5">Nama Pemohon (L/P)</th>
+                                    <th class="p-3.5">Layanan</th>
+                                    <th class="p-3.5">Tgl Akad / Rencana</th>
+                                    <th class="p-3.5">Status Berkas</th>
+                                    <th class="p-3.5 rounded-r-xl text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60 font-medium">
+                                <tr class="hover:bg-slate-800/40 transition-colors" data-type="bedol">
+                                    <td class="p-3.5 font-mono text-emerald-400">REG/008/2026</td>
+                                    <td class="p-3.5">
+                                        <div class="font-bold text-white">Ahmad Subagja</div>
+                                        <div class="text-[10px] text-slate-400">& Siti Nurhaliza</div>
+                                    </td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">Nikah Bedolan</span></td>
+                                    <td class="p-3.5">31 Okt 2026</td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 font-bold">Draf Review</span></td>
+                                    <td class="p-3.5 text-right space-x-2">
+                                        <button onclick="openWizardPreview('REG/008/2026')" class="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30" title="Buka Wizard"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button onclick="showToast('Mencetak Surat N1-N6...')" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700" title="Cetak Surat"><i class="fa-solid fa-print"></i></button>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-slate-800/40 transition-colors" data-type="kantor">
+                                    <td class="p-3.5 font-mono text-emerald-400">REG/007/2026</td>
+                                    <td class="p-3.5">
+                                        <div class="font-bold text-white">Budi Santoso</div>
+                                        <div class="text-[10px] text-slate-400">& Rina Wati</div>
+                                    </td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Nikah Kantor</span></td>
+                                    <td class="p-3.5">28 Okt 2026</td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-bold">Berkas Valid</span></td>
+                                    <td class="p-3.5 text-right space-x-2">
+                                        <button onclick="openWizardPreview('REG/007/2026')" class="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button onclick="showToast('Mencetak Surat N1-N6...')" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700"><i class="fa-solid fa-print"></i></button>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-slate-800/40 transition-colors" data-type="andon">
+                                    <td class="p-3.5 font-mono text-emerald-400">REG/006/2026</td>
+                                    <td class="p-3.5">
+                                        <div class="font-bold text-white">Dedi Kusnadi</div>
+                                        <div class="text-[10px] text-slate-400">(Tujuan: Kab. Sumedang)</div>
+                                    </td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20">Andon Nikah</span></td>
+                                    <td class="p-3.5">15 Nov 2026</td>
+                                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 font-bold">Rekomendasi Terbit</span></td>
+                                    <td class="p-3.5 text-right space-x-2">
+                                        <button onclick="showToast('Detail Surat Andon...')" class="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700"><i class="fa-solid fa-eye"></i></button>
+                                        <button onclick="showToast('Mencetak Surat Rekomendasi...')" class="p-2 rounded-lg bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30"><i class="fa-solid fa-print"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 2: DYNAMIC WIZARD FORM HOST PLACEHOLDER -->
+            <div id="view-registration-form" class="hidden space-y-6">
+                <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                    <div>
+                        <h2 id="activeFormTitle" class="text-lg font-extrabold text-white">Formulir Pendaftaran</h2>
+                        <p class="text-xs text-slate-400">Lengkapi data pendaftaran pernikahan terpadu</p>
+                    </div>
+                    <button onclick="switchTab('dashboard')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Dashboard
+                    </button>
+                </div>
+
+                <!-- Step Form Embed Preview Container -->
+                <div class="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 text-center space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto text-2xl">
+                        <i class="fa-solid fa-file-pen"></i>
+                    </div>
+                    <h3 id="formHostHeading" class="text-base font-extrabold text-white">Modul Form Pendaftaran Siap Dimuat</h3>
+                    <p class="text-xs text-slate-400 max-w-md mx-auto">
+                        Layout SILAPANDU ini siap meng-extends wizard pendaftaran nikah (seperti wizard 5 tahap caten pria, wanita, wali, saksi, dan pemeriksaan).
+                    </p>
+                    <button onclick="showToast('Membuka wizard pendaftaran lengkap...')" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20">
+                        Lanjutkan Pengisian Form
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW 3: RIWAYAT & DATA REGISTRASI -->
+            <div id="view-data-pendaftaran" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+                    <h2 class="text-lg font-extrabold text-white">Arsip & Data Pendaftaran Nikah</h2>
+                    <p class="text-xs text-slate-400">Seluruh basis data registrasi pernikahan Desa Jatiraga.</p>
+                    <div class="p-12 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-2xl">
+                        <i class="fa-solid fa-box-archive text-3xl mb-2 text-slate-600"></i>
+                        <p>Modul Pencarian & Filter Arsip Lanjutan</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: Pengaturan Penomoran Surat & TDT Digital -->
+    <div id="modalSettings" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-signature text-emerald-400"></i> Format Penomoran Surat & TDT
+                </h3>
+                <button onclick="closeModal('modalSettings')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); showToast('Pengaturan penomoran berhasil disimpan!'); closeModal('modalSettings');" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Format Nomor Surat N1 - N6</label>
+                    <input type="text" value="474.2/{NO}/Desa/{BLN}/{THN}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Nama Kepala Desa / Lurah Penandatangan</label>
+                    <input type="text" value="H. Nana Sukarna, S.IP" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">NIP / NIAP Kepala Desa</label>
+                    <input type="text" value="19780812 200501 1 004" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="pt-3 border-t border-slate-800 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('modalSettings')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Simpan Pengaturan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Panduan Aplikasi -->
+    <div id="modalGuide" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 border border-slate-800 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-amber-400"></i> Panduan Aplikasi SILAPANDU
+                </h3>
+                <button onclick="closeModal('modalGuide')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300 max-h-80 overflow-y-auto pr-1">
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-emerald-400 mb-1">1. Alur Nikah Kantor & Bedolan</h4>
+                    <p class="text-slate-400">Pilih menu "Pendaftaran Baru" &gt; Masukkan data Caten Pria & Wanita &gt; Verifikasi syarat N1-N6 &gt; Cetak berkas fisik KUA.</p>
+                </div>
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-cyan-400 mb-1">2. Pembuatan Andon Nikah</h4>
+                    <p class="text-slate-400">Khusus warga desa yang akan menikah di luar kecamatan. Sistem menerbitkan Surat Rekomendasi Numpang Nikah.</p>
+                </div>
+            </div>
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeModal('modalGuide')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Tentang Aplikasi -->
+    <div id="modalAbout" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 border border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-kaaba"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-white text-base">SILAPANDU v2.4</h3>
+                <p class="text-xs text-slate-400 mt-1">Sistem Layanan Pencatatan Pernikahan Terpadu</p>
+            </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+                Dikembangkan untuk digitalisasi pelayanan administrasi nikah tingkat Desa / KUA secara efektif, efisien, dan ramah pengguna.
+            </p>
+            <button onclick="closeModal('modalAbout')" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Logout Confirmation -->
+    <div id="modalLogout" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 rounded-3xl max-w-xs w-full p-6 border border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-white text-base">Konfirmasi Keluar</h3>
+                <p class="text-xs text-slate-400 mt-1">Apakah Anda yakin ingin keluar dari sesi SILAPANDU?</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="closeModal('modalLogout')" class="py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Batal</button>
+                <button onclick="showToast('Sesi diakhiri. Mengalihkan ke login...'); closeModal('modalLogout');" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-slate-100 border border-slate-700 px-4 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center space-x-3 transform translate-y-16 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMsg">Sistem diperbarui secara otomatis.</span>
+    </div>
+
+    <!-- JAVASCRIPT CONTROLLERS -->
+    <script>
+        // Toggle Submenu Accordions
+        function toggleSubmenu(menuId, arrowId) {
+            const menu = document.getElementById(menuId);
+            const arrow = document.getElementById(arrowId);
+
+            if (menu.classList.contains('submenu-open')) {
+                menu.classList.remove('submenu-open');
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                menu.classList.add('submenu-open');
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Toggle Mobile Sidebar
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // Tab Switching Concept
+        function switchTab(tabKey) {
+            // Hide all views
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-registration-form').classList.add('hidden');
+            document.getElementById('view-data-pendaftaran').classList.add('hidden');
+
+            const breadcrumb = document.getElementById('breadcrumb-active');
+
+            if (tabKey === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                breadcrumb.textContent = 'Dashboard Utama';
+            } else if (tabKey === 'data-pendaftaran') {
+                document.getElementById('view-data-pendaftaran').classList.remove('hidden');
+                breadcrumb.textContent = 'Riwayat & Data Nikah';
+            }
+        }
+
+        // Open Specific Registration Form Mode
+        function openRegistrationType(type) {
+            const titles = {
+                kantor: '1. Pendaftaran Nikah Kantor KUA',
+                bedol: '2. Pendaftaran Nikah Bedolan (Luar KUA)',
+                andon: '3. Pembuatan Surat Rekomendasi Andon Nikah'
+            };
+
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-data-pendaftaran').classList.add('hidden');
+            document.getElementById('view-registration-form').classList.remove('hidden');
+
+            document.getElementById('activeFormTitle').textContent = titles[type];
+            document.getElementById('formHostHeading').textContent = `Formulir ${titles[type]}`;
+            document.getElementById('breadcrumb-active').textContent = `Pendaftaran / ${type.toUpperCase()}`;
+            
+            showToast(`Memuat formulir ${titles[type]}...`);
+        }
+
+        function openWizardPreview(regNo) {
+            openRegistrationType('bedol');
+            showToast(`Membuka wizard pendaftaran untuk ${regNo}`);
+        }
+
+        // Filter Table Rows
+        function filterTable(type) {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                if (type === 'all' || row.getAttribute('data-type') === type) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            showToast(`Filter tabel: ${type.toUpperCase()}`);
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-16', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

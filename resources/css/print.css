@@ -1,0 +1,389 @@
+/* ==========================================================================
+   SILAPANDU — Print-Friendly CSS
+   Modul Preview & Cetak Surat Administrasi Perkawinan (Form N1–N6)
+   --------------------------------------------------------------------------
+   Digunakan oleh: resources/views/documents/index.blade.php
+                   resources/views/documents/templates/*.blade.php
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Ukuran Kertas & Margin Halaman
+   Standar surat administrasi pemerintahan desa: A4 (F4 / Folio 215×330 mm)
+   -------------------------------------------------------------------------- */
+@page {
+    size: A4 portrait;
+    margin: 2cm 2cm 2cm 2.5cm;
+}
+
+@page folio {
+    size: F4 portrait;
+    margin: 2cm 2cm 2cm 2.5cm;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset Dasar Halaman Cetak
+   -------------------------------------------------------------------------- */
+@media print {
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        width: auto !important;
+        min-height: auto !important;
+    }
+
+    /* Hilangkan seluruh efek visual browser (shadow, border dekoratif, dll) */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        border-color: #000000 !important;
+    }
+
+    /* Paksa seluruh teks menjadi hitam tegas (hitam penuh, bukan abu-abu) */
+    body * {
+        color: #000000 !important;
+        background-color: transparent !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Teks yang memang harus menjaga warna (mis. tanda tangan digital) */
+    .print-keep-color {
+        color: inherit !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Sembunyikan Elemen UI (Sidebar, Navbar, Tombol Cetak, dll)
+   -------------------------------------------------------------------------- */
+@media print {
+    .no-print,
+    [data-print='hide'],
+    .print-hidden {
+        display: none !important;
+    }
+
+    /* Navigasi & sidebar umum aplikasi */
+    .app-sidebar,
+    .app-navbar,
+    .app-header,
+    .app-footer,
+    aside,
+    nav,
+    header.app-header,
+    footer.app-footer {
+        display: none !important;
+    }
+
+    /* Tombol aksi cetak / unduh / preview */
+    .print-action,
+    .btn-print,
+    .btn-download,
+    .btn-preview,
+    button[data-print-button] {
+        display: none !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   4. Wadah Dokumen (Paper)
+   -------------------------------------------------------------------------- */
+.paper {
+    background: #ffffff;
+    color: #000000;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 2cm 2cm 2cm 2.5cm;
+    box-sizing: border-box;
+}
+
+/* Emulasi kertas di layar (screen) agar preview menyerupai hasil cetak */
+@media screen {
+    .paper-wrapper {
+        background: #e5e7eb;
+        padding: 1.5rem 1rem;
+        overflow: auto;
+    }
+
+    .paper {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        border: 1px solid #d1d5db;
+    }
+}
+
+@media print {
+    .paper-wrapper {
+        background: transparent !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .paper {
+        width: auto !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        border: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   5. Tipografi Surat Government Style
+   -------------------------------------------------------------------------- */
+.surat {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.35;
+    color: #000000;
+    text-align: left;
+}
+
+.surat p {
+    margin: 0 0 6px;
+    text-align: justify;
+}
+
+.surat table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0 0 8px;
+}
+
+.surat td {
+    padding: 1px 0;
+    vertical-align: top;
+    border: none;
+}
+
+/* Kolom label pada tabel identitas */
+.surat .label {
+    width: 34%;
+    padding-right: 10px;
+    vertical-align: top;
+}
+
+.surat .colon {
+    width: 3%;
+    text-align: center;
+    padding-right: 4px;
+}
+
+.surat .value {
+    width: 63%;
+    vertical-align: top;
+}
+
+/* --------------------------------------------------------------------------
+   6. Kop Surat & Judul
+   -------------------------------------------------------------------------- */
+.surat .kop {
+    text-align: center;
+    line-height: 1.2;
+}
+
+.surat .kop .emblem {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    margin: 0 auto 4px;
+    display: block;
+}
+
+.surat .kop .kop-image {
+    display: block;
+    width: 100%;
+    max-height: 110px;
+    object-fit: contain;
+    margin: 0 auto 6px;
+}
+
+.surat .kop .instansi {
+    font-size: 15pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.surat .kop .sub-instansi {
+    font-size: 12pt;
+    margin: 0;
+}
+
+.surat .kop .alamat {
+    font-size: 10pt;
+    margin: 0;
+}
+
+.surat .kop .garis-bawah {
+    border-bottom: 3px double #000000;
+    margin: 6px 0 0;
+    padding-bottom: 2px;
+}
+
+.surat .judul {
+    text-align: center;
+    margin: 14px 0 4px;
+}
+
+.surat .judul h1 {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.surat .judul h2 {
+    font-size: 13pt;
+    font-weight: normal;
+    margin: 0 0 10px;
+}
+
+.surat .judul .model {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 0;
+}
+
+.surat .lampiran {
+    font-size: 10pt;
+    line-height: 1.25;
+    margin: 0 0 2px;
+}
+
+.surat .nomor {
+    margin: 10px 0 12px;
+}
+
+.surat .nomor strong {
+    font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   7. Blok Tanda Tangan
+   -------------------------------------------------------------------------- */
+.surat .ttd {
+    margin-top: 26px;
+    margin-left: 58%;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+.surat .ttd .ruang-ttd {
+    height: 76px;
+}
+
+.surat .ttd .nama {
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.surat .ttd .nip {
+    margin: 0;
+    font-size: 11pt;
+}
+
+.surat .ttd-dua {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    margin-top: 30px;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+.surat .ttd-dua > div {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding: 0 8px;
+}
+
+.surat .ttd .copak {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   8. Penanda Isian Kosong (garis titik)
+   -------------------------------------------------------------------------- */
+.surat .isian-kosong {
+    display: inline-block;
+    min-width: 220px;
+    border-bottom: 1px dotted #000000;
+    height: 1em;
+    vertical-align: bottom;
+}
+
+/* --------------------------------------------------------------------------
+   9. Pemecahan Halaman
+   -------------------------------------------------------------------------- */
+.surat {
+    page-break-inside: auto;
+}
+
+.surat .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.surat h1,
+.surat h2,
+.surat h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   10. Tabel dengan Border (Formulir Terstruktur)
+   -------------------------------------------------------------------------- */
+.surat table.bordered {
+    border: 1px solid #000000;
+}
+
+.surat table.bordered td,
+.surat table.bordered th {
+    border: 1px solid #000000;
+    padding: 4px 6px;
+}
+
+.surat table.bordered th {
+    font-weight: bold;
+    text-align: left;
+    background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   11. Utilitas
+   -------------------------------------------------------------------------- */
+@media print {
+    .page-break {
+        page-break-before: always;
+        break-before: page;
+    }
+
+    a[href]::after {
+        content: '';
+    }
+
+    /* Cegah elemen terpotong saat cetak */
+    img,
+    table,
+    tr,
+    td,
+    th,
+    .avoid-break {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
