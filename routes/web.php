@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
-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 grpq
+
 |--------------------------------------------------------------------------
 */
 
