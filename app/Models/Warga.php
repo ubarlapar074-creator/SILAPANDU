@@ -49,10 +49,10 @@ class Warga extends Model
     /**
      * Nama warga dengan gelar.
      *
-     * // ponytail: Warga tidak memiliki kolom status_hidup, sehingga accessor ini
-     * //              tidak menambahkan gelar Alm./Almh. Orang tua yang meninggal
-     * //              selalu direpresentasikan sebagai RegistrationParent (yang
-     * //              memiliki status_hidup), tempat gelar Alm./Almh diterapkan.
+     * Warga tidak memiliki kolom status_hidup, sehingga accessor ini tidak
+     * menambahkan gelar Alm./Almh. Orang tua yang meninggal selalu
+     * direpresentasikan sebagai RegistrationParent (yang memiliki
+     * status_hidup), tempat gelar Alm./Almh diterapkan.
      */
     public function getNamaDenganGelarAttribute(): ?string
     {

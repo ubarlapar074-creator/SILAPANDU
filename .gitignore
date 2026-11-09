@@ -21,6 +21,15 @@
 /storage/*.key
 /storage/pail
 /vendor
+/.agents
+/.claude
+/.pi
+/.mcp.json
+/.opencode
+/AGENTS.md
+/CLAUDE.md
+/boost.json
+/opencode.json
 _ide_helper.php
 Homestead.json
 Homestead.yaml
